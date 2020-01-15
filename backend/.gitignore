@@ -1,0 +1,24 @@
+# Compiled class file
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
+*.tar.gz
+
+# Log Files #
+logs/
+
+# Upload Files #
+upload_files/
+
+# Maven Files #
+target/
+.mvn/wrapper/maven-wrapper.jar
+
+# System Files #
+.DS_Store
+
+# IntelliJ #
+.idea/

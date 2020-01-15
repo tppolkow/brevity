@@ -1,0 +1,6 @@
+kafka
+nltk
+lxml
+numpy
+BeautifulSoup4
+kafka-python
