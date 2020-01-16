@@ -4,6 +4,8 @@ KAFKA_DIR=$((grep -w "KAFKA_DIR" | cut -d= -f2) < properties)
 
 cd $KAFKA_DIR
 
+pwd
+
 echo "starting zookeeper..."
 ./bin/zookeeper-server-start.sh config/zookeeper.properties > ../brevity/log/zk.log &
 sleep 2
@@ -25,6 +27,7 @@ echo "starting backend..."
 # start nlp workers
 cd ..
 echo "starting nlp..."
+pip3 install -r nlp/requirements.txt -U
 python3 nlp/src/extraction.py > log/nlp.log &
 
 # sleep for 10s while backend starts .... 
