@@ -4,3 +4,4 @@ lxml
 numpy
 BeautifulSoup4
 kafka-python
+kafka_helper
