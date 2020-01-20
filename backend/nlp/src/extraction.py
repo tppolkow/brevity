@@ -1,15 +1,31 @@
 import heapq
 import re
+import logging
+import os
 
 import nltk
+import kafka_helper
+
 from kafka import KafkaConsumer
 from kafka import KafkaProducer
 
 summary_len = 20
 
-producer = KafkaProducer(bootstrap_servers='localhost:9092')
-consumer = KafkaConsumer('brevity_requests',
-                         bootstrap_servers=['localhost:9092'])
+prefix = os.getenv('KAFKA_PREFIX', '')
+servers = kafka_helper.get_kafka_brokers()
+certs = kafka_helper.get_kafka_ssl_context()
+producer = KafkaProducer(
+    bootstrap_servers = servers,
+    security_protocol = 'SSL', 
+    ssl_context = certs
+)
+consumer = KafkaConsumer(
+    prefix + 'brevity_request', 
+    bootstrap_servers = servers, 
+    group_id = prefix + 'brevity_consumer',
+    security_protocol = 'SSL', 
+    ssl_context = certs
+)
 
 for message in consumer:
     key = str(message.key)
@@ -72,4 +88,4 @@ for message in consumer:
     summary = summary.replace('\\x9d', ' ')
     print(summary)
 
-    producer.send('brevity_responses', str.encode(summary), key=key.encode())
+    producer.send(os.getenv('KAFKA_PREFIX', '') + 'brevity_response', str.encode(summary), key=key.encode())

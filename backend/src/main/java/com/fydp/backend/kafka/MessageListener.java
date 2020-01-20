@@ -3,6 +3,7 @@ package com.fydp.backend.kafka;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +25,7 @@ public class MessageListener {
         messages = new HashMap<>();
     }
 
-    @KafkaListener(topics = "brevity_responses", groupId = KafkaConsumerConfig.groupId)
+    @KafkaListener(topics = "${brevity.kafka.response.topic}", groupId = "${brevity.kafka.groupId}")
     public void listen(ConsumerRecord<String, String> record){
 
         logger.info("Received message : \n"  + record.key() + " : " + record.value());
