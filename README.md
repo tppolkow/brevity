@@ -15,3 +15,11 @@ Logs are output in log directory where you can tail them. To see all logs when s
 If something goes wrong kafka/zookeeper may have to be manually closed. To do this just run `./close.sh`
 If this doesn't work you can try manually killing the process: `for pid in $(ps aux | grep kafka | grep brevity | awk '{print $2}'); do kill -9 $pid; done`
 
+## Docker
+For anyone looking to run brevity inside the container: 
+1. Download docker on your PC
+2. Clone our github repo and cd into it
+3. Run `docker image build -t brevity .`
+4. Run `docker run --rm -d --network host --name brevity brevity`
+5. Run `docker exec -it brevity bash`
+6. cd into ~/brevity/ and execute ./run.sh
