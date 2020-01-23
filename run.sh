@@ -2,16 +2,12 @@
 
 KAFKA_DIR=$((grep -w "KAFKA_DIR" | cut -d= -f2) < properties)
 
-cd $KAFKA_DIR
-
 echo "starting zookeeper..."
-./bin/zookeeper-server-start.sh config/zookeeper.properties > ../brevity/log/zk.log &
+$KAFKA_DIR/bin/zookeeper-server-start.sh $KAFKA_DIR/config/zookeeper.properties > ./log/zk.log &
 sleep 2
 
 echo "starting kafka..."
-./bin/kafka-server-start.sh config/server.properties > ../brevity/log/kafka.log &
-
-cd ../brevity
+$KAFKA_DIR/bin/kafka-server-start.sh $KAFKA_DIR/config/server.properties > ./log/kafka.log &
 
 #start backend
 cd backend/
