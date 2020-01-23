@@ -8,3 +8,5 @@ cd $KAFKA_DIR
 for pid in $(ps aux | grep '[f]ydp/brevity/backend' | awk {'print $2'}); do kill -9 $pid; done
 
 for pid in $(ps aux | grep '[k]afka' | grep brevity | awk '{print $2}'); do kill -9 $pid; done
+
+for pid in $(ps aux | grep '[p]ython' | grep nlp | awk '{print $2}'); do kill -9 $pid; done

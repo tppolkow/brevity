@@ -2,6 +2,9 @@
 
 KAFKA_DIR=$((grep -w "KAFKA_DIR" | cut -d= -f2) < properties)
 
+# Make log directory if not exists
+mkdir -p log
+
 echo "starting zookeeper..."
 $KAFKA_DIR/bin/zookeeper-server-start.sh $KAFKA_DIR/config/zookeeper.properties > ./log/zk.log &
 sleep 2
