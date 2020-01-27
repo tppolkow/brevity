@@ -15,3 +15,10 @@ Logs are output in log directory where you can tail them. To see all logs when s
 If something goes wrong kafka/zookeeper may have to be manually closed. To do this just run `./close.sh`
 If this doesn't work you can try manually killing the process: `for pid in $(ps aux | grep kafka | grep brevity | awk '{print $2}'); do kill -9 $pid; done`
 
+## Setup Heroku Local and running
+1. Install Heroku CLI (source: https://devcenter.heroku.com/articles/heroku-cli)
+2. Login to Heroku using the credentials
+3. Run `heroku config` and export all the config vars as environment variables on local machine
+e.g. `export CONFIG_VAR="CONFIG_VAR_VAL"`
+4. Build backend with `./mvnw package`
+5. Start the local environment using `heroku local -f Procfile.dev` which enables debugging for Spring boot
