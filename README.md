@@ -22,3 +22,13 @@ If this doesn't work you can try manually killing the process: `for pid in $(ps 
 e.g. `export CONFIG_VAR="CONFIG_VAR_VAL"`
 4. Build backend with `./mvnw package`
 5. Start the local environment using `heroku local -f Procfile.dev` which enables debugging for Spring boot
+
+## Docker
+For anyone looking to run brevity inside the container: 
+1. Download docker on your PC
+2. Clone our github repo and cd into it
+3. Run `docker image build -t brevity .`
+4. Run `docker run --rm -d --network host --name brevity brevity`
+5. Run `docker exec -it brevity bash`
+6. cd into ~/brevity/ and execute ./run.sh
+
