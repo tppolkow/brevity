@@ -20,6 +20,7 @@ If this doesn't work you can try manually killing the process: `for pid in $(ps 
 2. See https://devcenter.heroku.com/articles/collab for collaboration
 3. Run `heroku config` and export all the config vars as environment variables on local machine
 e.g. `export CONFIG_VAR="CONFIG_VAR_VAL"`
+4. Run `prepareEnv.sh` at root directory e.g. brevity/
 4. Build backend with `./mvnw package`
 5. Start the local environment using `heroku local -f Procfile.dev` which enables debugging for Spring boot
 
