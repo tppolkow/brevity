@@ -16,9 +16,13 @@ If something goes wrong kafka/zookeeper may have to be manually closed. To do th
 If this doesn't work you can try manually killing the process: `for pid in $(ps aux | grep kafka | grep brevity | awk '{print $2}'); do kill -9 $pid; done`
 
 ## Setup Heroku Local and running
-1. Install Heroku CLI (source: https://devcenter.heroku.com/articles/heroku-cli)
-2. Login to Heroku using the credentials
+1. Install Heroku CLI (see: https://devcenter.heroku.com/articles/heroku-cli)
+2. See https://devcenter.heroku.com/articles/collab for collaboration
 3. Run `heroku config` and export all the config vars as environment variables on local machine
 e.g. `export CONFIG_VAR="CONFIG_VAR_VAL"`
 4. Build backend with `./mvnw package`
 5. Start the local environment using `heroku local -f Procfile.dev` which enables debugging for Spring boot
+
+## Deploy to Heroku (Currently not available yet)
+1. There should be two remote, one remote that points to the upstream of the repo, and another for deployed heroku app
+2. Deploy backend using `git subtree push --prefix backend/ heroku master`. Please use this command at all times when deploying so the app only contains necessary backend code
