@@ -26,3 +26,13 @@ e.g. `export CONFIG_VAR="CONFIG_VAR_VAL"`
 ## Deploy to Heroku (Currently not available yet)
 1. There should be two remote, one remote that points to the upstream of the repo, and another for deployed heroku app
 2. Deploy backend using `git subtree push --prefix backend/ heroku master`. Please use this command at all times when deploying so the app only contains necessary backend code
+
+## Docker
+For anyone looking to run brevity inside the container: 
+1. Download docker on your PC
+2. Clone our github repo and cd into it
+3. Run `docker image build -t brevity .`
+4. Run `docker run --rm -d --network host --name brevity brevity`
+5. Run `docker exec -it brevity bash`
+6. cd into ~/brevity/ and execute ./run.sh
+
