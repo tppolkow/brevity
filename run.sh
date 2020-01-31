@@ -19,19 +19,18 @@ echo "building backend..."
 sleep 2
 
 echo "starting backend..."
-./mvnw spring-boot:run > ../log/backend.log &
+./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8081" > ../log/backend.log &
 
 # start nlp workers
-cd ..
 echo "starting nlp..."
-pip3 install -r nlp/requirements.txt -U
-python3 nlp/src/extraction.py > log/nlp.log &
+pip3 install -r requirements.txt -U
+python3 nlp/src/extraction.py > ../log/nlp.log &
 
 # sleep for 10s while backend starts .... 
 # volatile - if stuff is failing on your machine maybe increase sleep time
 sleep 10
 
-cd frontend/
+cd ../frontend/
 echo "installing npm dependencies"
 npm install > ../log/npm.log
 echo "updating npm dependencies"
