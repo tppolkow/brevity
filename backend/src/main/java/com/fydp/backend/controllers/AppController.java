@@ -1,5 +1,6 @@
 package com.fydp.backend.controllers;
 
+import com.fydp.backend.extraction.FigureExtractor;
 import com.fydp.backend.kafka.KafkaProducer;
 import com.fydp.backend.kafka.MessageListener;
 import com.fydp.backend.model.ChapterTextModel;
@@ -38,7 +39,7 @@ import java.util.regex.Pattern;
 public class AppController {
 
     private static final Logger logger = LoggerFactory.getLogger(AppController.class);
-    private static final String UPLOAD_PATH = System.getProperty("user.dir") + "/upload_files/";
+    public static final String UPLOAD_PATH = System.getProperty("user.dir") + "/upload_files/";
     private static final String END_OF_CHAPTER = "End of Last Chapter";
     private static final String CHAPTER_REGEX = "^(?i)\\bChapter\\b";
 
@@ -67,8 +68,12 @@ public class AppController {
 
         try {
             listener.getLatch().await();
+            FigureExtractor.extract("blah");
         } catch (InterruptedException e) {
             logger.error("Error while waiting for kafka response : " + e.getMessage());
+            e.printStackTrace();
+        } catch (IOException e) {
+            logger.error("Error extracting figures : " + e.getMessage());
             e.printStackTrace();
         }
 
