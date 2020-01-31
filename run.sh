@@ -19,7 +19,7 @@ echo "building backend..."
 sleep 2
 
 echo "starting backend..."
-./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8080" > ../log/backend.log &
+./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8081" > ../log/backend.log &
 
 # start nlp workers
 echo "starting nlp..."
