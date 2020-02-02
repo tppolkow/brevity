@@ -76,6 +76,6 @@ class Extract:
 
 
 extract = Extract()
-extract.read_text('/home/syedmoiz/Documents/brevity/backend/nlp/data/in2.txt')
+extract.read_text('../../data/in2.txt')
 extract.extract_sents()
 extract.print_sentences()
