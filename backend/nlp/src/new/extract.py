@@ -1,5 +1,5 @@
-from new.sentence import Sentence
-from new.paragraph import Paragraph
+from sentence import Sentence
+from paragraph import Paragraph
 
 import numpy as np
 
