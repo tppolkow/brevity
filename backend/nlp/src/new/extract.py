@@ -15,11 +15,10 @@ class Extract:
 
     def read_text(self, path_to_text):
         with open(path_to_text, 'r') as file:
-            self.text = file.read().replace('\n', '')
+            self.text = file.readlines()
 
     def extract_sents(self):
-        raw_paras = self.text.split('\n')
-        print(raw_paras)
+        raw_paras = self.text
         print(len(raw_paras))
         for para in raw_paras:
             self.para_count += 1
