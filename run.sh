@@ -24,7 +24,7 @@ echo "starting backend..."
 # start nlp workers
 echo "starting nlp..."
 pip3 install -r requirements.txt -U
-python3 nlp/src/extraction.py > ../log/nlp.log &
+python3 nlp/src/old/extraction.py > ../log/nlp.log &
 
 # sleep for 10s while backend starts .... 
 # volatile - if stuff is failing on your machine maybe increase sleep time
