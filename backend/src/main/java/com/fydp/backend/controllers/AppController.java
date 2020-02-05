@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,6 +33,7 @@ import java.util.regex.Pattern;
  * TODO: Refactor the code such that we can store and get data from database once the database is implemented
  */
 
+@CrossOrigin
 @RestController
 public class AppController {
 
@@ -60,7 +60,6 @@ public class AppController {
         return "index";
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping(value = ("/summaries"))
     public Map<String, String> getSummaries() {
         logger.info("GET summary endpoint hit");
@@ -75,7 +74,6 @@ public class AppController {
         return listener.getMessages();
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping(value = ("/upload"), headers = ("content-type=multipart/*"))
     public PdfInfo upload(@RequestParam("file") MultipartFile file) throws IOException {
         logger.debug("Upload endpoint hit");
@@ -131,7 +129,6 @@ public class AppController {
         return pdfInfo;
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping(value = "/upload/chapters", consumes = {MediaType.APPLICATION_JSON_VALUE})
     public ChapterTextModel parseChapters(@RequestBody PdfInfo response) throws IOException {
         List<String> chapters = response.getChapters();
