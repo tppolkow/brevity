@@ -2,6 +2,7 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { post } from 'axios';
 import { Button, Form } from 'react-bootstrap';
+import Config from './Config';
 import './ChapterSelectorList.css';
 
 class ChapterSelectorList extends React.Component {
@@ -35,7 +36,7 @@ class ChapterSelectorList extends React.Component {
       chapters: selectedChapters
     };
 
-    post("http://localhost:8080/upload/chapters", reqBody)
+    post(Config.serverUrl + "/upload/chapters", reqBody)
       .then(res => this.setState({ goToSummary: true, }));
   }
 
