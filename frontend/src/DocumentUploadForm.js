@@ -34,7 +34,6 @@ class DocumentUploadForm extends React.Component {
   }
 
   render() {
-    console.log(this.props.endpoint)
     return (
       <div>
         <Form className="upload-form" onSubmit={this.handleSubmit} encType="multipart/form-data">

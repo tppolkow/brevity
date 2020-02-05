@@ -18,7 +18,6 @@ class SummaryViewer extends React.Component {
       get(Config.serverUrl + "/summaries").then(res => {
         this.setState({ summaries: res.data });
         console.log("standalone", this.state);
-        console.log(Config.serverUrl)
       });
     }
   }
