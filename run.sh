@@ -14,17 +14,14 @@ $KAFKA_DIR/bin/kafka-server-start.sh $KAFKA_DIR/config/server.properties > ./log
 
 #start backend
 cd backend/
-echo "building backend..."
-./mvnw package > ../log/backend.log
+echo "build and start backend..."
+./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8081" -Dspring-boot.run.profiles=dev > ../log/backend.log &
 sleep 2
-
-echo "starting backend..."
-./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8081" > ../log/backend.log &
 
 # start nlp workers
 echo "starting nlp..."
 pip3 install -r requirements.txt -U
-python3 nlp/src/extraction.py > ../log/nlp.log &
+python3 nlp/src/old/extraction.py > ../log/nlp.log &
 
 # sleep for 10s while backend starts .... 
 # volatile - if stuff is failing on your machine maybe increase sleep time

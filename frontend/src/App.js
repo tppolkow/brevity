@@ -1,6 +1,7 @@
 import React from 'react';
 import { Container } from 'react-bootstrap';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
+import Config from './Config';
 import ChapterSelectorList from './ChapterSelectorList';
 import DocumentUploadForm from './DocumentUploadForm';
 import SummaryViewer from './SummaryViewer';
@@ -21,7 +22,7 @@ class App extends React.Component {
             <Route 
               path="/" 
               exact 
-              render={(props) => <DocumentUploadForm {...props} endpoint="http://localhost:8080/upload"/>}
+              render={(props) => <DocumentUploadForm {...props} endpoint={Config.serverUrl + "/upload"}/>}
             />
             <Route path="/chapter-select" component={ChapterSelectorList} />
             <Route path="/summary" component={SummaryViewer} />
