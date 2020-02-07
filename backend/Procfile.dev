@@ -1,2 +1,2 @@
-web: java -jar -Dserver.port=$PORT -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5000 $JAVA_OPTS target/backend-0.0.1-SNAPSHOT.jar
-worker: python3 nlp/src/extraction.py
+web: java -jar -Dserver.port=$PORT -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5001 $JAVA_OPTS target/backend-0.0.1-SNAPSHOT.jar
+worker: python3 nlp/src/old/extraction.py
