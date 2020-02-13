@@ -130,7 +130,7 @@ public class AppController {
     }
 
     @PostMapping(value = "/upload/chapters", consumes = {MediaType.APPLICATION_JSON_VALUE})
-    public ChapterTextModel parseChapters(@RequestBody PdfInfo response) throws IOException {
+    public void parseChapters(@RequestBody PdfInfo response) throws IOException {
         List<String> chapters = response.getChapters();
         Map<String, Integer> pgMap = response.getChapterPgMap();
         List<String> refChapters = new ArrayList<>(pgMap.keySet());
@@ -149,14 +149,14 @@ public class AppController {
             }
         }
 
-        chapterTextModel.setChpTextMap(chapterTxt);
+//        chapterTextModel.setChpTextMap(chapterTxt);
         for (Map.Entry entry : chapterTxt.entrySet()) {
             producer.sendMessageWithKey(entry.getValue().toString(), entry.getKey().toString());
         }
         listener.setMessages(chapterTxt.size());
 
         document.close();
-        return chapterTextModel;
+//        return chapterTextModel;
     }
 
     private File loadPdfFile(MultipartFile file) {
