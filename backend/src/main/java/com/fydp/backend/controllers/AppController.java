@@ -39,7 +39,7 @@ public class AppController {
     private static final Logger logger = LoggerFactory.getLogger(AppController.class);
     private static final String UPLOAD_PATH = System.getProperty("user.dir") + "/upload_files/";
     private static final String END_OF_CHAPTER = "End of Last Chapter";
-    private static final String CHAPTER_REGEX = ".*\\d.*";
+    private static final String CHAPTER_REGEX = "(\\bchapter|\\bch|\\bch\\.|\\bchap|\\bchap\\.|\\bpart|\\bsection|^)\\s*\\d+";
 
     @Autowired
     private PdfInfo pdfInfo;
