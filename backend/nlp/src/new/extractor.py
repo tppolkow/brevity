@@ -7,7 +7,7 @@ from matrix_builder import MatrixBuilder
 
 class Extractor:
     @staticmethod
-    def extract():
+    def extract(summary_length):
         c = Cleaner()
         text = c.clean('../../data/in5.txt')
 
@@ -21,7 +21,7 @@ class Extractor:
         # print(m.sentences)
         print(pageranks)
 
-        result = nlargest(50, pageranks, key=pageranks.get)
+        result = nlargest(summary_length, pageranks, key=pageranks.get)
         result.sort()
         print(result)
 
@@ -30,4 +30,4 @@ class Extractor:
 
 
 ext = Extractor()
-ext.extract()
+ext.extract(summary_length=50)
