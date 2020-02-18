@@ -1,5 +1,6 @@
 import numpy as np
 import operator
+from heapq import nlargest
 from cleaner import Cleaner
 from grapher import Grapher
 from similarity import Similarity
@@ -48,9 +49,10 @@ g = Grapher()
 pageranks = g.graph(matrix)
 # print(m.sentences)
 print(pageranks)
-(k1, v1) = max(pageranks.items(), key=operator.itemgetter(1))
-(k2, v2) = min(pageranks.items(), key=operator.itemgetter(1))
 
-print('Top => key: {} | score: {} | text: {}'.format(k1, v1, m.sentences[k1]))
-print('Low => key: {} | score: {} | text: {}'.format(k2, v2, m.sentences[k2]))
+result = nlargest(5, pageranks, key=pageranks.get)
+result.sort()
+print(result)
 
+for key in result:
+    print(m.sentences[key])
