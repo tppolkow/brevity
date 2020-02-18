@@ -27,5 +27,5 @@ class Cleaner:
         return text
 
 
-c = Cleaner()
-print(c.clean('../../data/in3.txt'))
+# c = Cleaner()
+# print(c.clean('../../data/in3.txt'))

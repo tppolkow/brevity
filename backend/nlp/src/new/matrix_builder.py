@@ -48,6 +48,5 @@ g = Grapher()
 pageranks = g.graph(matrix)
 print(pageranks)
 (k, v) = max(pageranks.items(), key=operator.itemgetter(1))
-print(m.sentences)
 print(m.sentences[k-1])
 
