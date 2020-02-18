@@ -1,5 +1,6 @@
 import React from 'react';
 import { get } from 'axios';
+import Config from './Config';
 
 class SummaryViewer extends React.Component {
   constructor(props) {
@@ -14,7 +15,7 @@ class SummaryViewer extends React.Component {
       console.log("redirected to", this.state);
       console.log("props location state", props.location.state);
     } else {
-      get("http://localhost:8080/summaries").then(res => {
+      get(Config.serverUrl + "/summaries").then(res => {
         this.setState({ summaries: res.data });
         console.log("standalone", this.state);
       });
