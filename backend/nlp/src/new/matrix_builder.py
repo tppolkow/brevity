@@ -46,8 +46,11 @@ matrix = m.build_sim_matrix(text)
 
 g = Grapher()
 pageranks = g.graph(matrix)
-print(m.sentences)
+# print(m.sentences)
 print(pageranks)
-(k, v) = max(pageranks.items(), key=operator.itemgetter(1))
-print('Top => key: {} | score: {} | text: {}'.format(k, v, m.sentences[k]))
+(k1, v1) = max(pageranks.items(), key=operator.itemgetter(1))
+(k2, v2) = min(pageranks.items(), key=operator.itemgetter(1))
+
+print('Top => key: {} | score: {} | text: {}'.format(k1, v1, m.sentences[k1]))
+print('Low => key: {} | score: {} | text: {}'.format(k2, v2, m.sentences[k2]))
 
