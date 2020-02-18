@@ -4,3 +4,5 @@ lxml
 numpy
 BeautifulSoup4
 kafka-python
+matplotlib
+networkx
