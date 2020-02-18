@@ -7,9 +7,9 @@ from matrix_builder import MatrixBuilder
 
 class Extractor:
     @staticmethod
-    def extract(summary_length):
+    def extract(raw_txt, summary_length):
         c = Cleaner()
-        text = c.clean('../../data/in5.txt')
+        text = c.clean(raw_txt)
 
         m = MatrixBuilder()
         matrix = m.build_sim_matrix(text)
@@ -30,4 +30,4 @@ class Extractor:
 
 
 ext = Extractor()
-ext.extract(summary_length=50)
+ext.extract(raw_txt='../../data/in5.txt', summary_length=50)
