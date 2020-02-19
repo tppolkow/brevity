@@ -53,6 +53,11 @@
 			<version>2.2.1.RELEASE</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -60,6 +65,18 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+
+			<plugin>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-maven-plugin</artifactId>
+				<configuration>
+					<user>postgres</user>
+					<password>postgres</password>
+					<schemas>
+						<schema>brevity</schema>
+					</schemas>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
