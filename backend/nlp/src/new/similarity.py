@@ -37,16 +37,3 @@ class Similarity:
             c += l1[i] * l2[i]
         cosine = c / float((sum(l1) * sum(l2)) ** 0.5)
         return cosine
-
-
-# sim = Similarity()
-# print(sim.calculate_similarity_score("I love horror movies",
-#                                      "Lights out is a horror movie"))
-#
-# # Should equal 1 b/c input is same sentences
-# print(sim.calculate_similarity_score("I love horror movies", "I love horror "
-#                                                              "movies"))
-#
-# # Should equal 0 b/c completely different sentences
-# print(sim.calculate_similarity_score("I love horror movies", "pizza tastes "
-#                                                              "good"))

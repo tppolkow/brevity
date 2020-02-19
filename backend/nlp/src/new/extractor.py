@@ -44,22 +44,18 @@ consumer = KafkaConsumer('brevity_requests',
 ext = Extractor()
 
 for message in consumer:
-    print("got kafka msg")
     key = str(message.key)
-    print(key)
     text_array = str(message.value)
-    text = ""
-    sent_count = 0
-    for sentence in text_array:
-        text += sentence
-        sent_count += 1
+    text = ''
+    character_count = 0
+    for character in text_array:
+        text += character
+        character_count += 1
 
-    summary_len = int(sent_count / 5)
+    summary_len = int(character_count / 5)
     if summary_len > 20:
         summary_len = 20
 
-    # print('{} {}'.format(sent_count, summary_len))
     summary = ext.extract(raw_txt=text, summary_length=summary_len)
-    # print(summary)
 
     producer.send('brevity_responses', str.encode(summary), key=key.encode())

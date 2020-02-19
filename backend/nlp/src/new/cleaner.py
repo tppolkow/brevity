@@ -59,8 +59,3 @@ class Cleaner:
         with open(input_file) as file:
             text = file.read()
             return self.clean(text)
-
-
-# c = Cleaner()
-# # c.clean_file('../../data/in4.txt')
-# print(c.clean_file('../../data/in4.txt'))
