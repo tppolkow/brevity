@@ -29,9 +29,11 @@ class Extractor:
 
         result = ''
         for key in top_ranked:
-            result += m.sentences[key]
+            top_ranked_sentence = m.sentences[key].strip()
+            print('.{}.'.format(top_ranked_sentence))
+            result += '{}. '.format(top_ranked_sentence)
 
-        print(result)
+        # print(result)
         return result
 
 
@@ -54,6 +56,6 @@ for message in consumer:
 
     print(sent_count)
     summary = ext.extract(raw_txt=text, summary_length=int(sent_count / 5))
-    print(summary)
+    # print(summary)
 
     producer.send('brevity_responses', str.encode(summary), key=key.encode())
