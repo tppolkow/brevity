@@ -14,6 +14,9 @@ $KAFKA_DIR/bin/kafka-server-start.sh $KAFKA_DIR/config/server.properties > ./log
 
 #start backend
 cd backend/
+echo "running migrations..."
+./mvnw clean flyway:migrate -Dflyway.configFile=myFlywayConfig.properties
+
 echo "build and start backend..."
 ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8081" -Dspring-boot.run.profiles=dev > ../log/backend.log &
 sleep 2
