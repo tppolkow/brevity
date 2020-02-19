@@ -39,7 +39,7 @@ class Cleaner:
         for sent in cleaned_sentences:
             new_sent = ''
             for word in sent.split():
-                if len(word) < 4:
+                if len(word) < 2:
                     pass
                 else:
                     if word[0] == 'n':
