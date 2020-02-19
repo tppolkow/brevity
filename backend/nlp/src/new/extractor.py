@@ -6,6 +6,7 @@ from matrix_builder import MatrixBuilder
 from kafka import KafkaConsumer
 from kafka import KafkaProducer
 
+
 class Extractor:
     @staticmethod
     def extract(raw_txt, summary_length):
@@ -20,22 +21,24 @@ class Extractor:
         g = Grapher()
         pageranks = g.graph(matrix)
         # print(m.sentences)
-        print(pageranks)
+        # print(pageranks)
 
-        result = nlargest(summary_length, pageranks, key=pageranks.get)
-        result.sort()
+        top_ranked = nlargest(summary_length, pageranks, key=pageranks.get)
+        top_ranked.sort()
+        # print(result)
+
+        result = ''
+        for key in top_ranked:
+            result += m.sentences[key]
+
         print(result)
-
-        for key in result:
-            print(m.sentences[key])
-
         return result
 
 
 producer = KafkaProducer(bootstrap_servers='localhost:9092')
 consumer = KafkaConsumer('brevity_requests',
                          bootstrap_servers=['localhost:9092'])
- 
+
 ext = Extractor()
 
 for message in consumer:
@@ -44,9 +47,13 @@ for message in consumer:
     print(key)
     text_array = str(message.value)
     text = ""
+    sent_count = 0
     for sentence in text_array:
         text += sentence
+        sent_count += 1
 
-    summary = ext.extract(raw_txt=text, summary_length=50)
+    print(sent_count)
+    summary = ext.extract(raw_txt=text, summary_length=int(sent_count / 5))
+    print(summary)
 
     producer.send('brevity_responses', str.encode(summary), key=key.encode())

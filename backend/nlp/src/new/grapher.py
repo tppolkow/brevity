@@ -12,7 +12,7 @@ class Grapher:
         pos = nx.spring_layout(graph)
         nx.draw(graph, pos, with_labels=True)
         nx.draw_networkx_edge_labels(graph, pos, edge_labels=edge_labels)
-        plt.show()
+        # plt.show()
 
         return pagerank
 
