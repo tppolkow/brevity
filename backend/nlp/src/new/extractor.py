@@ -9,31 +9,39 @@ from kafka import KafkaProducer
 
 class Extractor:
     @staticmethod
-    def extract(raw_txt, summary_length):
+    def extract(raw_txt):
         c = Cleaner()
-        text = c.clean(raw_txt)
+        cleaned_text_list = c.clean(raw_txt)
+
+        print(len(cleaned_text_list))
+        print('Done cleaning')
+        # print(cleaned_text_list)
 
         m = MatrixBuilder()
-        matrix = m.build_sim_matrix(text)
+        matrix = m.build_sim_matrix(cleaned_text_list)
         # print(matrix)
         # print('Dimensions: {}'.format(matrix.shape))
+
+        print('Done building sim matrix')
 
         g = Grapher()
         pageranks = g.graph(matrix)
         # print(m.sentences)
         # print(pageranks)
 
+        print('Generated graph and got pageranks')
+
+        summary_length = int(0.2 * len(cleaned_text_list))
         top_ranked = nlargest(summary_length, pageranks, key=pageranks.get)
         top_ranked.sort()
         # print(result)
 
         result = ''
         for key in top_ranked:
-            top_ranked_sentence = m.sentences[key].strip()
+            top_ranked_sentence = m.sentences[key]
             # print('.{}.'.format(top_ranked_sentence))
             result += '{}. '.format(top_ranked_sentence)
 
-        # print(result)
         return result
 
 
@@ -45,17 +53,13 @@ ext = Extractor()
 
 for message in consumer:
     key = str(message.key)
-    text_array = str(message.value)
+    text_array = message.value.decode('utf-8')
     text = ''
-    character_count = 0
     for character in text_array:
         text += character
-        character_count += 1
 
-    summary_len = int(character_count / 5)
-    if summary_len > 20:
-        summary_len = 20
+    summary = ext.extract(raw_txt=text)
 
-    summary = ext.extract(raw_txt=text, summary_length=summary_len)
+    print(summary)
 
     producer.send('brevity_responses', str.encode(summary), key=key.encode())

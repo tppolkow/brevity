@@ -4,56 +4,46 @@ import re
 class Cleaner:
     @staticmethod
     def clean(text):
-        cleaned_sentences = []
-        pattern = re.compile('([^\s\w]|_)+')
+        # Remove all \n \r
+        text = text.replace('\n', ' ')
+        text = text.replace('\r', ' ')
 
+        # Remove anywhere there is more than 2 spaces together
+        text = ' '.join(text.split())
+
+        # Split text into sentences
         sentences = text.split('.')
 
-        # Take out all non-alphanumeric chars
-        for sent in sentences:
-            # print(sent)
-            sent = pattern.sub('', sent)
-            cleaned_sentences.append(sent)
+        # Remove any space at the beginning or end of sentence
+        for sentence in sentences:
+            index = sentences.index(sentence)
+            new_sentence = sentence.strip()
+            sentences[index] = new_sentence
 
-        # Remove all empty sentences
-        while '' in cleaned_sentences:
-            cleaned_sentences.remove('')
+        # Join any 1 word sentence with previous sentence
+        for sentence in sentences:
+            if len(sentence.split()) == 1:
+                index = sentences.index(sentence)
+                previous_sentence = sentences[index - 1]
+                if index < len(sentences) - 1:
+                    next_sentence = sentences[index + 1]
+                sentences[index - 1] = '{}.{}.{}'.format(previous_sentence,
+                                                         sentence,
+                                                         next_sentence)
+                sentences[index] = ''
+                if index < len(sentences) - 1:
+                    sentences[index + 1] = ''
 
-        # Remove all words that are not certain length
-        min_word_len = 2
-        for sent in cleaned_sentences:
-            index = cleaned_sentences.index(sent)
-            # print('{} {}'.format(index, sent))
-            new_sent = ''
-            for word in sent.split():
-                if word == 'n':
-                    # print('Unacceptable word {}'.format(word))
-                    pass
-                else:
-                    new_sent += '{} '.format(word)
-            # print(new_sent)
-            cleaned_sentences[index] = new_sent
+        # Replace any sentences that have less than 5 words with empty
+        for sentence in sentences:
+            if len(sentence.split()) < 5:
+                index = sentences.index(sentence)
+                sentences[index] = ''
 
-        # Fix up words that are like 'nID' and 'n4A'
-        new_cleaned_sentences = []
-        for sent in cleaned_sentences:
-            new_sent = ''
-            for word in sent.split():
-                if len(word) < 2:
-                    pass
-                else:
-                    if word[0] == 'n':
-                        word = word[1:]
-                new_sent += '{} '.format(word)
-            new_cleaned_sentences.append(new_sent)
+        # Drop any empty sentences
+        sentences = list(filter(None, sentences))
 
-        text = ''
-        for cs in new_cleaned_sentences:
-            text += '{}.'.format(cs)
-
-        text = text.rstrip('.')
-
-        return text
+        return sentences
 
     def clean_file(self, input_file):
         with open(input_file) as file:

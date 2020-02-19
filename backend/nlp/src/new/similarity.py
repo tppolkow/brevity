@@ -10,8 +10,15 @@ import nltk
 class Similarity:
     @staticmethod
     def calculate_similarity_score(x, y):
-        x_list = word_tokenize(x)
-        y_list = word_tokenize(y)
+        # x_list = word_tokenize(x)
+        # print(x_list)
+        # y_list = word_tokenize(y)
+        # print(y_list)
+
+        x_list = x.split()
+        # print(x_list)
+        y_list = y.split()
+        # print(y_list)
 
         sw = stopwords.words('english')
         l1 = []

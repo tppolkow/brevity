@@ -6,14 +6,15 @@ from similarity import Similarity
 class MatrixBuilder:
     sentences = []
 
-    def build_sim_matrix(self, input_text):
+    def build_sim_matrix(self, sentence_list):
         sim = Similarity()
-        self.sentences = input_text.split('.')
+        self.sentences = sentence_list
         sim_matrix = np.empty([len(self.sentences), len(self.sentences)])
 
         # print(sentences)
 
         for i in range(0, len(self.sentences)):
+            print('Working on => {} => {}'.format(i, self.sentences[i]))
             for j in range(i + 1, len(self.sentences)):
                 s1 = self.sentences[i]
                 s2 = self.sentences[j]
