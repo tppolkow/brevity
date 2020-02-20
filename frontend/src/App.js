@@ -5,6 +5,7 @@ import Config from './Config';
 import ChapterSelectorList from './ChapterSelectorList';
 import DocumentUploadForm from './DocumentUploadForm';
 import SummaryViewer from './SummaryViewer';
+import Login from './Login';
 import './App.css';
 
 class App extends React.Component {
@@ -19,6 +20,7 @@ class App extends React.Component {
         <div className="App">
           <Container>
             <h1 className="title">Brevity</h1>
+            <Route path="/login" component={Login} />
             <Route 
               path="/" 
               exact 
