@@ -19,15 +19,18 @@ class ChapterSelectorList extends React.Component {
 
   handleInputChange(e) {
     const target = e.target;
-    this.setState({ [target.name]: target.checked });
+    this.setState({ [target.id]: target.checked });
   }
 
   handleSubmit(e) {
     e.preventDefault();
 
     const selectedChapters = Object.entries(this.state)
-      .reduce((selected, [chapter, checked]) => {
-          if (checked) selected.push(chapter);
+      .reduce((selected, [chapId, checked]) => {
+          if (checked) {
+            const id = chapId.split('-')[1];
+            selected.push(this.props.location.state.data.chapters[id]);
+          }
           return selected;
       }, []);
 
@@ -46,10 +49,10 @@ class ChapterSelectorList extends React.Component {
     return chapters.map((chapter, index) =>
       <div className="chapter-selector-item" key={index}>
         <Form.Check
-          name={chapter}
+          name={chapter.title}
           id={`chapter-${index}`}
           type="checkbox"
-          label={chapter}
+          label={chapter.title}
           checked={this.state.chapter}
           onChange={this.handleInputChange}
         />
