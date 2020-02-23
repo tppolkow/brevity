@@ -7,8 +7,8 @@ import java.util.Map;
 
 @Component
 public class PdfInfo {
-    private Map<String, Integer> chapterPgMap;
-    private List<String> chapters;
+
+    private List<Bookmark> chapters;
     private String pdfText;
     private String fileName;
 
@@ -16,20 +16,12 @@ public class PdfInfo {
 
     }
 
-    public void setChapterPgMap(Map<String, Integer> chapterPgMap) {
-        this.chapterPgMap = chapterPgMap;
-    }
-
-    public Map<String, Integer> getChapterPgMap() {
-        return chapterPgMap;
-    }
-
-    public void setChapters(List<String> chapters) {
-        this.chapters = chapters;
-    }
-
-    public List<String> getChapters() {
+    public List<Bookmark> getChapters() {
         return chapters;
+    }
+
+    public void setChapters(List<Bookmark> chapters) {
+        this.chapters = chapters;
     }
 
     public void setPdfText(String pdfText) {

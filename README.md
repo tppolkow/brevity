@@ -23,3 +23,16 @@ For anyone looking to run brevity inside the container:
 4. Run `docker run --rm -d --network host --name brevity brevity`
 5. Run `docker exec -it brevity bash`
 6. cd into ~/brevity/ and execute ./run.sh
+
+## Database
+Database tables should be automatically set up with migrations. Postgresql database needs to be running on your local on port 5432 (the default postgresql port). User and pw should be postgres.
+
+Sample commands to set up on ubuntu:
+`sudo apt-get install postgresql` installs postgresql
+
+`sudo su - postgres` starts up postgres
+
+For the first time you run, you will have to set the password to be postgres. To do this, after running the above command do the following:
+`psql`
+`\password postgres`
+enter new password ( for now just type `postgres` ) 
