@@ -93,7 +93,7 @@ def build_similarity_matrix(sentences, stop_words):
 def main():
     stop_words = stopwords.words('english')
 
-    with open("raw_input.txt", "r") as input_file:
+    with open("in1.txt", "r") as input_file:
         text = input_file.readlines()
 
     sentences0 = nltk.sent_tokenize(text[0])
