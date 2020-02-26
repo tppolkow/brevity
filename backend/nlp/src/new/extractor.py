@@ -74,4 +74,4 @@ for message in consumer:
 
     print(summary)
 
-    producer.send('brevity_responses', str.encode(summary), key=key.encode())
+    producer.send(prefix + 'brevity_responses', str.encode(summary), key=key.encode())
