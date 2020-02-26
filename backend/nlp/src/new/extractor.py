@@ -43,11 +43,22 @@ class Extractor:
             result += '{}. '.format(top_ranked_sentence)
 
         return result
-
-
-producer = KafkaProducer(bootstrap_servers='localhost:9092')
-consumer = KafkaConsumer('brevity_requests',
-                         bootstrap_servers=['localhost:9092'])
+        
+prefix = os.getenv('KAFKA_PREFIX', '')
+servers = kafka_helper.get_kafka_brokers()
+certs = kafka_helper.get_kafka_ssl_context()
+producer = KafkaProducer(
+    bootstrap_servers = servers,
+    security_protocol = 'SSL', 
+    ssl_context = certs
+)
+consumer = KafkaConsumer(
+    prefix + 'brevity_request', 
+    bootstrap_servers = servers, 
+    group_id = prefix + 'brevity_consumer',
+    security_protocol = 'SSL', 
+    ssl_context = certs
+)
 
 ext = Extractor()
 
