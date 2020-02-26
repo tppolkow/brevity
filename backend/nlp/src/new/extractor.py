@@ -5,7 +5,7 @@ from grapher import Grapher
 from matrix_builder import MatrixBuilder
 from kafka import KafkaConsumer
 from kafka import KafkaProducer
-
+import os
 
 class Extractor:
     @staticmethod
@@ -43,7 +43,7 @@ class Extractor:
             result += '{}. '.format(top_ranked_sentence)
 
         return result
-        
+
 prefix = os.getenv('KAFKA_PREFIX', '')
 servers = kafka_helper.get_kafka_brokers()
 certs = kafka_helper.get_kafka_ssl_context()
