@@ -2,12 +2,13 @@ package com.fydp.backend.controllers;
 
 import com.fydp.backend.kafka.KafkaProducer;
 import com.fydp.backend.kafka.MessageListener;
+import com.fydp.backend.model.Bookmark;
 import com.fydp.backend.model.ChapterTextModel;
 import com.fydp.backend.model.PdfInfo;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.interactive.action.PDActionGoTo;
+import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDNamedDestination;
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageDestination;
-import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDDocumentOutline;
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem;
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineNode;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -24,7 +25,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -40,7 +40,7 @@ public class AppController {
     private static final Logger logger = LoggerFactory.getLogger(AppController.class);
     private static final String UPLOAD_PATH = System.getProperty("user.dir") + "/upload_files/";
     private static final String END_OF_CHAPTER = "End of Last Chapter";
-    private static final String CHAPTER_REGEX = "^(?i)\\bChapter\\b";
+    private static final String CHAPTER_REGEX = "(\\bchapter|\\bch|\\bch\\.|\\bchap|\\bchap\\.|\\bpart|\\bsection|^)\\s*\\d+";
 
     @Autowired
     private PdfInfo pdfInfo;
@@ -78,79 +78,59 @@ public class AppController {
     public PdfInfo upload(@RequestParam("file") MultipartFile file) throws IOException {
         logger.debug("Upload endpoint hit");
 
-        boolean containsBookMarks = false;
-        String pdfText = "";
         PDDocument document = parsePDF(loadPdfFile(file));
-        Map<String, Integer> map = new LinkedHashMap<>();
-        Map<String, Integer> chapterPgMap = new LinkedHashMap<>();
-        if (document != null) {
-            PDDocumentOutline outline = document.getDocumentCatalog().getDocumentOutline();
-            if (outline != null) {
-                containsBookMarks = true;
-                storeBookmarks(outline, map, 0);
-            } else {
-                pdfText = new PDFTextStripper().getText(document);
-            }
-        } else {
+        if (document == null) {
             logger.error("Not able to load PDF");
+            return pdfInfo;
         }
 
-        if (containsBookMarks) {
-            Pattern pattern = Pattern.compile(CHAPTER_REGEX);
-            for (Map.Entry<String, Integer> entry : map.entrySet()) {
-                Matcher match = pattern.matcher(entry.getKey());
-                if (match.find()) {
-                    chapterPgMap.put(entry.getKey(), entry.getValue());
-                }
-            }
+        var bookmarks = getBookmarks(document);
 
-            List<String> allChapters = new ArrayList<>(map.keySet());
-            List<String> chapters = new ArrayList<>(chapterPgMap.keySet());
+        if (!bookmarks.isEmpty()) {
+            var chapters = findChapters(bookmarks, CHAPTER_REGEX);
 
-            if (allChapters.size() == chapters.size()) {
-                chapterPgMap.put(END_OF_CHAPTER, document.getNumberOfPages());
-            } else {
-                String lastChapter = chapters.get(chapters.size() - 1);
-                String endOfLastChapter = allChapters.get(allChapters.indexOf(lastChapter) + 1);
-                chapterPgMap.put(endOfLastChapter, map.get(endOfLastChapter));
+            // If no bookmarks match the chapter format, consider all bookmarks as chapters
+            if (chapters.isEmpty()) {
+                logger.info("No chapters found. Using all bookmarks.");
+                chapters = bookmarks;
             }
 
             pdfInfo.setChapters(chapters);
-            pdfInfo.setChapterPgMap(chapterPgMap);
+            pdfInfo.setPdfText("");
+        } else {
+            logger.info("No bookmarks found in PDF. Summarizing entire document.");
+            String pdfText = new PDFTextStripper().getText(document);
+            pdfInfo.setPdfText(pdfText);
+            if (!pdfText.isEmpty()) {
+                producer.sendMessage(pdfText);
+                listener.setMessages(1);
+            }
         }
 
-        pdfInfo.setPdfText(pdfText);
         pdfInfo.setFileName(file.getOriginalFilename());
-        if (!pdfText.isEmpty()) {
-            producer.sendMessage(pdfText);
-            listener.setMessages(1);
-        }
+
         document.close();
         return pdfInfo;
     }
 
     @PostMapping(value = "/upload/chapters", consumes = {MediaType.APPLICATION_JSON_VALUE})
     public ChapterTextModel parseChapters(@RequestBody PdfInfo response) throws IOException {
-        List<String> chapters = response.getChapters();
-        Map<String, Integer> pgMap = response.getChapterPgMap();
-        List<String> refChapters = new ArrayList<>(pgMap.keySet());
+        List<Bookmark> chapters = response.getChapters();
         Map<String, String> chapterTxt = new HashMap<>();
         PDDocument document = parsePDF(new File(UPLOAD_PATH + response.getFileName()));
-        for (String chapter : chapters) {
-            int startPg = pgMap.get(chapter);
-            int endPg = pgMap.get(refChapters.get(refChapters.indexOf(chapter) + 1));
+        for (var chapter : chapters) {
             try {
                 PDFTextStripper reader = new PDFTextStripper();
-                reader.setStartPage(startPg);
-                reader.setEndPage(endPg - 1);
-                chapterTxt.put(chapter, reader.getText(document));
+                reader.setStartPage(chapter.getStartPage());
+                reader.setEndPage(chapter.getEndPage() - 1);
+                chapterTxt.put(chapter.getTitle(), reader.getText(document));
             } catch (IOException ex) {
                 logger.error("Unable to create text stripper", ex);
             }
         }
 
         chapterTextModel.setChpTextMap(chapterTxt);
-        for (Map.Entry entry : chapterTxt.entrySet()) {
+        for (var entry : chapterTxt.entrySet()) {
             producer.sendMessageWithKey(entry.getValue().toString(), entry.getKey().toString());
         }
         listener.setMessages(chapterTxt.size());
@@ -192,23 +172,136 @@ public class AppController {
         return doc;
     }
 
-    private void storeBookmarks(PDOutlineNode bookmark, Map<String, Integer> map, int depth) throws IOException {
+    /**
+     * Retrieves the bookmarks of a PDF document in a flattened map structure
+     * @param doc PDF document
+     * @return Map of bookmarks
+     * @throws IOException
+     */
+    private List<Bookmark> getBookmarks(PDDocument doc) throws IOException {
+        var bookmarks = new ArrayList<Bookmark>();
+        var bookmarkRoot = doc.getDocumentCatalog().getDocumentOutline();
+        if (bookmarkRoot != null) {
+            storeBookmarks(bookmarkRoot, bookmarks, 0, doc);
+        }
+        return bookmarks;
+    }
+
+    private void storeBookmarks(PDOutlineNode bookmark, List<Bookmark> bookmarks, int depth, PDDocument doc) throws IOException {
         PDOutlineItem current = bookmark.getFirstChild();
 
         while (current != null) {
-            if (depth == 2) {
-                break;
+            if (depth == 3) break;
+
+            int currIndex = bookmarks.size();
+            var b = new Bookmark();
+            b.setTitle(current.getTitle());
+            b.setDepth(depth);
+            bookmarks.add(b);
+
+            int startPage = getBookmarkStartPage(current, doc);
+            if (startPage != -1) {
+                b.setStartPage(startPage);
+            } else {
+                logger.error("Could not find start page for bookmark \"{}\"", current.getTitle());
             }
-            PDActionGoTo action = (PDActionGoTo) current.getAction();
-            PDPageDestination destination = (PDPageDestination) action.getDestination();
-            int pageNum = 0;
-            if (destination != null) {
-                pageNum = destination.retrievePageNumber() + 1;
+            int endPage = getBookmarkEndPage(current, currIndex, bookmarks, doc);
+            if (endPage != -1) {
+                b.setEndPage(endPage);
+            } else {
+                logger.error("Could not find end page for bookmark \"{}\"", current.getTitle());
             }
-            map.put(current.getTitle(), pageNum);
-            storeBookmarks(current, map, depth + 1);
+
+            // Store current bookmark's children
+            storeBookmarks(current, bookmarks, depth + 1, doc);
+
             current = current.getNextSibling();
         }
+    }
+
+    private int getBookmarkStartPage(PDOutlineItem bookmark, PDDocument document) throws IOException {
+        // Taken from PDFBox example
+        if (bookmark.getDestination() instanceof PDPageDestination)
+        {
+            PDPageDestination pd = (PDPageDestination) bookmark.getDestination();
+            return pd.retrievePageNumber() + 1;
+        }
+        else if (bookmark.getDestination() instanceof PDNamedDestination)
+        {
+            PDPageDestination pd = document.getDocumentCatalog().findNamedDestinationPage((PDNamedDestination) bookmark.getDestination());
+            if (pd != null)
+            {
+                return pd.retrievePageNumber() + 1;
+            }
+        }
+
+        if (bookmark.getAction() instanceof PDActionGoTo)
+        {
+            PDActionGoTo gta = (PDActionGoTo) bookmark.getAction();
+            if (gta.getDestination() instanceof PDPageDestination)
+            {
+                PDPageDestination pd = (PDPageDestination) gta.getDestination();
+                return pd.retrievePageNumber() + 1;
+            }
+            else if (gta.getDestination() instanceof PDNamedDestination)
+            {
+                PDPageDestination pd = document.getDocumentCatalog().findNamedDestinationPage((PDNamedDestination) gta.getDestination());
+                if (pd != null)
+                {
+                    return pd.retrievePageNumber() + 1;
+                }
+            }
+        }
+
+        return -1;
+    }
+
+    private int getBookmarkEndPage(PDOutlineItem bookmark, int bookmarkIndex, List<Bookmark> bookmarks, PDDocument document) throws IOException {
+        var next = bookmark.getNextSibling();
+        int endPage = -1;
+        if (next != null) {
+            endPage = getBookmarkStartPage(next, document);
+        } else {
+            var parent = getParentBookmark(bookmarkIndex, bookmarks);
+            if (parent != null) {
+                endPage = parent.getEndPage();
+            } else if (bookmarks.get(bookmarkIndex).getDepth() == 0) {
+                endPage = document.getNumberOfPages();
+            }
+        }
+        return endPage;
+    }
+
+    private Bookmark getParentBookmark(int childIndex, List<Bookmark> bookmarks) {
+        var child = bookmarks.get(childIndex);
+        if (child.getDepth() == 0) return null;
+        int curr = childIndex;
+        while (bookmarks.get(curr).getDepth() >= child.getDepth()) {
+            curr--;
+            if (curr < 0) {
+                logger.error("Could not find parent for bookmark \"{}\"", bookmarks.get(curr).getTitle());
+                return null;
+            }
+        }
+        return bookmarks.get(curr);
+    }
+
+    /**
+     * Finds bookmarks matching the specified chapter regex
+     * @param bookmarks Bookmarks to search
+     * @param chapterRegex Regex to match with chapters
+     * @return Matching bookmarks
+     */
+    private List<Bookmark> findChapters(List<Bookmark> bookmarks, String chapterRegex) {
+        var chapters = new ArrayList<Bookmark>();
+        var pattern = Pattern.compile(chapterRegex);
+        for (var b : bookmarks) {
+            var match = pattern.matcher(b.getTitle());
+            if (match.find()) {
+                chapters.add(b);
+            }
+        }
+        return chapters;
     }
 
 }
