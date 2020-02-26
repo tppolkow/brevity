@@ -1,11 +1,12 @@
-from heapq import nlargest
+import os
+import kafka_helper
 
+from heapq import nlargest
 from cleaner import Cleaner
 from grapher import Grapher
 from matrix_builder import MatrixBuilder
 from kafka import KafkaConsumer
 from kafka import KafkaProducer
-import os
 
 class Extractor:
     @staticmethod
