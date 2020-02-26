@@ -14,7 +14,7 @@ class Login extends React.Component {
             <div className="login-container">
                 <div className="login-content">
                     <a className="google-login" href={GOOGLE_AUTH_URL}>
-                        <img src={googleLogo} /> Log in With Google </a>
+                        <img src={googleLogo} alt="google logo"/> Log in With Google </a>
                 </div>
             </div>
         )
