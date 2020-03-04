@@ -5,7 +5,7 @@ from grapher import Grapher
 from matrix_builder import MatrixBuilder
 from kafka import KafkaConsumer
 from kafka import KafkaProducer
-
+import struct
 
 class Extractor:
     @staticmethod
@@ -52,7 +52,10 @@ consumer = KafkaConsumer('brevity_requests',
 ext = Extractor()
 
 for message in consumer:
-    key = str(message.key)
+    # unpack the summary id, set > for big endian, Q for unsigned long
+    (key,) = struct.unpack('>Q', message.key)
+    print("Processing summary id :",key)
+
     text_array = message.value.decode('utf-8')
     text = ''
     for character in text_array:
@@ -62,4 +65,5 @@ for message in consumer:
 
     print(summary)
 
-    producer.send('brevity_responses', str.encode(summary), key=key.encode())
+    producer.send('brevity_responses', str.encode(summary), struct.pack('>Q', key))
+
