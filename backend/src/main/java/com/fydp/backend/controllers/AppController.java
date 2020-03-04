@@ -1,10 +1,9 @@
 package com.fydp.backend.controllers;
 
 import com.fydp.backend.kafka.KafkaProducer;
-import com.fydp.backend.kafka.MessageListener;
 import com.fydp.backend.model.Bookmark;
-import com.fydp.backend.model.ChapterTextModel;
 import com.fydp.backend.model.PdfInfo;
+import com.fydp.backend.service.SummaryService;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.interactive.action.PDActionGoTo;
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDNamedDestination;
@@ -15,9 +14,11 @@ import org.apache.pdfbox.text.PDFTextStripper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 /**
@@ -46,13 +48,10 @@ public class AppController {
     private PdfInfo pdfInfo;
 
     @Autowired
-    private ChapterTextModel chapterTextModel;
-
-    @Autowired
-    private MessageListener listener;
-
-    @Autowired
     private KafkaProducer producer;
+
+    @Autowired
+    private SummaryService summaryService;
 
     @RequestMapping("/")
     public String welcome() {
@@ -60,20 +59,40 @@ public class AppController {
         return "index";
     }
 
-    @GetMapping(value = ("/summaries"))
-    public Map<String, String> getSummaries() {
+    @GetMapping(value = ("/summaries/{id}"))
+    public Map<String, String> getSummaries(@PathVariable String id) throws InterruptedException {
         logger.info("GET summary endpoint hit");
+        Long summary_id = Long.parseLong(id);
 
-        try {
-            listener.getLatch().await();
-        } catch (InterruptedException e) {
-            logger.error("Error while waiting for kafka response : " + e.getMessage());
-            e.printStackTrace();
+        // wait up to 30s for summary to finish
+        long end = System.currentTimeMillis() + 30000;
+
+        Map<String, String> ret = new HashMap<>();
+
+        while (System.currentTimeMillis() < end) {
+            var summary = summaryService.findById(summary_id);
+
+            if (summary.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No summary job for this id");
+            }
+
+            var summ = summary.get();
+
+            if (summ.isFinished()){
+                ret.put("title", summ.getTitle());
+                ret.put("data", summ.getData());
+                break;
+            }
+
+            TimeUnit.SECONDS.sleep(5);
         }
 
-        return listener.getMessages();
+        if (ret.isEmpty()) throw new ResponseStatusException(HttpStatus.ACCEPTED, "Summary still processing");
+
+        return ret;
     }
 
+    // returns pdfInfo which contains the summaryId to hit /summaries/{id}
     @PostMapping(value = ("/upload"), headers = ("content-type=multipart/*"))
     public PdfInfo upload(@RequestParam("file") MultipartFile file) throws IOException {
         logger.debug("Upload endpoint hit");
@@ -97,14 +116,22 @@ public class AppController {
 
             pdfInfo.setChapters(chapters);
             pdfInfo.setPdfText("");
+            // summary id of 0 means no summary job submitted yet
+            pdfInfo.setSummaryId(0L);
         } else {
             logger.info("No bookmarks found in PDF. Summarizing entire document.");
             String pdfText = new PDFTextStripper().getText(document);
             pdfInfo.setPdfText(pdfText);
+
+            //create the summary entry and get id of this summary
+            var summary_id = summaryService.createSummary("Summary");
+            pdfInfo.setSummaryId(summary_id);
+
             if (!pdfText.isEmpty()) {
-                producer.sendMessage(pdfText);
-                listener.setMessages(1);
+                //send text with associated summary id to kafka
+                producer.sendMessageWithKey(pdfText, summary_id);
             }
+
         }
 
         pdfInfo.setFileName(file.getOriginalFilename());
@@ -113,30 +140,32 @@ public class AppController {
         return pdfInfo;
     }
 
+    //@return: returns map of chapter titles to summary_ids
+    // can use these summary ids to hit the /summaries/{id} endpoint to retrieve summary for that chapter
     @PostMapping(value = "/upload/chapters", consumes = {MediaType.APPLICATION_JSON_VALUE})
-    public ChapterTextModel parseChapters(@RequestBody PdfInfo response) throws IOException {
+    public Map<String,Long> parseChapters(@RequestBody PdfInfo response) throws IOException {
         List<Bookmark> chapters = response.getChapters();
-        Map<String, String> chapterTxt = new HashMap<>();
+        Map<String, Long> chapterIds = new HashMap<>();
         PDDocument document = parsePDF(new File(UPLOAD_PATH + response.getFileName()));
         for (var chapter : chapters) {
             try {
                 PDFTextStripper reader = new PDFTextStripper();
                 reader.setStartPage(chapter.getStartPage());
                 reader.setEndPage(chapter.getEndPage() - 1);
-                chapterTxt.put(chapter.getTitle(), reader.getText(document));
+
+                var summary_id = summaryService.createSummary(chapter.getTitle());
+                chapterIds.put(chapter.getTitle(), summary_id);
+                String rawText = reader.getText(document);
+                if (!rawText.isEmpty()) {
+                    producer.sendMessageWithKey(rawText, summary_id);
+                }
             } catch (IOException ex) {
                 logger.error("Unable to create text stripper", ex);
             }
         }
 
-        chapterTextModel.setChpTextMap(chapterTxt);
-        for (var entry : chapterTxt.entrySet()) {
-            producer.sendMessageWithKey(entry.getValue().toString(), entry.getKey().toString());
-        }
-        listener.setMessages(chapterTxt.size());
-
         document.close();
-        return chapterTextModel;
+        return chapterIds;
     }
 
     private File loadPdfFile(MultipartFile file) {
