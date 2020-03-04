@@ -5,6 +5,7 @@ import Config from './Config';
 import ChapterSelectorList from './ChapterSelectorList';
 import DocumentUploadForm from './DocumentUploadForm';
 import SummaryViewer from './SummaryViewer';
+import Oauth2RedirectHandler from './OauthRedirectHandler';
 import Login from './Login';
 import './App.css';
 
@@ -28,6 +29,7 @@ class App extends React.Component {
               />
               <Route path="/chapter-select" component={ChapterSelectorList} />
               <Route path="/summary" component={SummaryViewer} />
+              <Route path="/oauth2/redirect" component={Oauth2RedirectHandler} />
             </Switch>
           </Container>
         </div>

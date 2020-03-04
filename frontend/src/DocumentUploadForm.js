@@ -2,6 +2,7 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { post } from 'axios';
 import { Button, Form } from 'react-bootstrap';
+import { ACCESS_TOKEN } from './Constants'; 
 
 class DocumentUploadForm extends React.Component {
   constructor(props) {
@@ -23,7 +24,9 @@ class DocumentUploadForm extends React.Component {
     const formData = new FormData();
     formData.append("file", this.fileInput.current.files[0]);
 
-    post(this.props.endpoint, formData)
+    let config = { headers: { Authorization: 'Bearer ' + localStorage.getItem(ACCESS_TOKEN) }}
+    
+    post(this.props.endpoint, formData, config)
       .then(res => {
         if (res.data.pdfText !== '') {
           this.setState({ goToSummary: true });

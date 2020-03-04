@@ -45,5 +45,8 @@ target/
 # IntelliJ #
 .idea/
 *.iml
+
 # Local Netlify folder
 .netlify
+
+backend/nlp/src/new/__pycache__/
