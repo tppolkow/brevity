@@ -1,7 +1,7 @@
 import React from 'react';
 import { Container } from 'react-bootstrap';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import Config from './Config';
+import { BASE_URLS } from './Constants';
 import ChapterSelectorList from './ChapterSelectorList';
 import DocumentUploadForm from './DocumentUploadForm';
 import SummaryViewer from './SummaryViewer';
@@ -20,12 +20,11 @@ class App extends React.Component {
       <Router>
         <div className="App">
           <Container>
-            <h1 className="title">Brevity</h1>
             <Switch>
               <Route exact path="/" component={Login} />
               <Route 
                 path="/upload"  
-                render={(props) => <DocumentUploadForm {...props} endpoint={Config.serverUrl + "/upload"}/>}
+                render={(props) => <DocumentUploadForm {...props} endpoint={BASE_URLS.serverUrl + "/upload"}/>}
               />
               <Route path="/chapter-select" component={ChapterSelectorList} />
               <Route path="/summary" component={SummaryViewer} />

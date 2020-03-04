@@ -1,7 +1,6 @@
 package com.fydp.backend.security;
 
 import com.fydp.backend.service.CustomUserDetailService;
-import io.jsonwebtoken.Jwt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

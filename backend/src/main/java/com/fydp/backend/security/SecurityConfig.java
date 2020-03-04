@@ -13,8 +13,6 @@ import org.springframework.security.oauth2.client.web.AuthorizationRequestReposi
 import org.springframework.security.oauth2.client.web.HttpSessionOAuth2AuthorizationRequestRepository;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-// source: https://github.com/callicoder/spring-boot-react-oauth2-social-login-demo
-
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
