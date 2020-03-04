@@ -11,6 +11,7 @@ public class PdfInfo {
     private List<Bookmark> chapters;
     private String pdfText;
     private String fileName;
+    private Long summaryId;
 
     public PdfInfo() {
 
@@ -38,5 +39,13 @@ public class PdfInfo {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public Long getSummaryId() {
+        return summaryId;
+    }
+
+    public void setSummaryId(Long summaryId) {
+        this.summaryId = summaryId;
     }
 }
