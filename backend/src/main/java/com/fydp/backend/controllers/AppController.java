@@ -97,6 +97,7 @@ public class AppController {
         return ret;
     }
 
+    // returns pdfInfo which contains the summaryId to hit /summaries/{id}
     @PostMapping(value = ("/upload"), headers = ("content-type=multipart/*"))
     public PdfInfo upload(@RequestParam("file") MultipartFile file) throws IOException {
         logger.debug("Upload endpoint hit");
@@ -144,6 +145,8 @@ public class AppController {
         return pdfInfo;
     }
 
+    //@return: returns map of chapter titles to summary_ids
+    // can use these summary ids to hit the /summaries/{id} endpoint to retrieve summary for that chapter
     @PostMapping(value = "/upload/chapters", consumes = {MediaType.APPLICATION_JSON_VALUE})
     public ChapterTextModel parseChapters(@RequestBody PdfInfo response) throws IOException {
         List<Bookmark> chapters = response.getChapters();
@@ -161,9 +164,16 @@ public class AppController {
         }
 
         chapterTextModel.setChpTextMap(chapterTxt);
+        Map<String, Long> chapterIds = new HashMap<>();
         for (var entry : chapterTxt.entrySet()) {
-           // producer.sendMessageWithKey(entry.getValue().toString(), entry.getKey().toString());
+            var summary_id = summaryService.createSummary(entry.getKey());
+            chapterIds.put(entry.getKey(), summary_id);
+            if (!entry.getValue().isEmpty()) {
+                producer.sendMessageWithKey(entry.getValue(), summary_id);
+            }
         }
+
+        chapterTextModel.setChpId(chapterIds);
 
         document.close();
         return chapterTextModel;
