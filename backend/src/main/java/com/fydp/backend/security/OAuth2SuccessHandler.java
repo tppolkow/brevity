@@ -4,6 +4,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
@@ -27,11 +28,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     @Value(value = "${brevity.frontend.url}")
     private String targetUrl;
 
-    @Value(value = "${jwt.secret}")
-    private String secret;
-
-    @Value(value = "${jwt.expireTime}")
-    private long expireTime;
+    @Autowired
+    private TokenUtil tokenUtil;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -41,25 +39,9 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         getRedirectStrategy().sendRedirect(request, response, url);
     }
 
-    private String createToken(Authentication authentication) {
-        logger.info("Creating token");
-        var user = (DefaultOidcUser) authentication.getPrincipal();
-        var attributes = user.getAttributes();
-
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + expireTime);
-
-        return Jwts.builder()
-                .setSubject((String)attributes.get("sub"))
-                .setIssuedAt(new Date())
-                .setExpiration(expiryDate)
-                .signWith(SignatureAlgorithm.HS512, secret)
-                .compact();
-    }
-
     private String buildUrl(Authentication authentication) {
         logger.info("Building URL");
-        String token = createToken(authentication);
+        String token = tokenUtil.createToken(authentication);
         return UriComponentsBuilder.fromUriString(targetUrl + "/oauth2/redirect")
                 .queryParam("token", token)
                 .build().toUriString();
