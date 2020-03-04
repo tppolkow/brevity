@@ -51,3 +51,6 @@ target/
 *.iml
 # Local Netlify folder
 .netlify
+
+backend/nlp/src/new/__pycache__/*
+backend/nlp/src/new/*.swp
