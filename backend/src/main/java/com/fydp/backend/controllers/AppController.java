@@ -1,9 +1,7 @@
 package com.fydp.backend.controllers;
 
 import com.fydp.backend.kafka.KafkaProducer;
-import com.fydp.backend.kafka.MessageListener;
 import com.fydp.backend.model.Bookmark;
-import com.fydp.backend.model.ChapterTextModel;
 import com.fydp.backend.model.PdfInfo;
 import com.fydp.backend.service.SummaryService;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -48,9 +46,6 @@ public class AppController {
 
     @Autowired
     private PdfInfo pdfInfo;
-
-    @Autowired
-    private ChapterTextModel chapterTextModel;
 
     @Autowired
     private KafkaProducer producer;
@@ -148,35 +143,29 @@ public class AppController {
     //@return: returns map of chapter titles to summary_ids
     // can use these summary ids to hit the /summaries/{id} endpoint to retrieve summary for that chapter
     @PostMapping(value = "/upload/chapters", consumes = {MediaType.APPLICATION_JSON_VALUE})
-    public ChapterTextModel parseChapters(@RequestBody PdfInfo response) throws IOException {
+    public Map<String,Long> parseChapters(@RequestBody PdfInfo response) throws IOException {
         List<Bookmark> chapters = response.getChapters();
-        Map<String, String> chapterTxt = new HashMap<>();
+        Map<String, Long> chapterIds = new HashMap<>();
         PDDocument document = parsePDF(new File(UPLOAD_PATH + response.getFileName()));
         for (var chapter : chapters) {
             try {
                 PDFTextStripper reader = new PDFTextStripper();
                 reader.setStartPage(chapter.getStartPage());
                 reader.setEndPage(chapter.getEndPage() - 1);
-                chapterTxt.put(chapter.getTitle(), reader.getText(document));
+
+                var summary_id = summaryService.createSummary(chapter.getTitle());
+                chapterIds.put(chapter.getTitle(), summary_id);
+                String rawText = reader.getText(document);
+                if (!rawText.isEmpty()) {
+                    producer.sendMessageWithKey(rawText, summary_id);
+                }
             } catch (IOException ex) {
                 logger.error("Unable to create text stripper", ex);
             }
         }
 
-        chapterTextModel.setChpTextMap(chapterTxt);
-        Map<String, Long> chapterIds = new HashMap<>();
-        for (var entry : chapterTxt.entrySet()) {
-            var summary_id = summaryService.createSummary(entry.getKey());
-            chapterIds.put(entry.getKey(), summary_id);
-            if (!entry.getValue().isEmpty()) {
-                producer.sendMessageWithKey(entry.getValue(), summary_id);
-            }
-        }
-
-        chapterTextModel.setChpId(chapterIds);
-
         document.close();
-        return chapterTextModel;
+        return chapterIds;
     }
 
     private File loadPdfFile(MultipartFile file) {
