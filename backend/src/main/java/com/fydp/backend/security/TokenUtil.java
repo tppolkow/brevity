@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
-// source: https://github.com/callicoder/spring-boot-react-oauth2-social-login-demo
+// source: https://www.callicoder.com/spring-boot-security-oauth2-social-login-part-2/s
 
 @Service
 public class TokenUtil {

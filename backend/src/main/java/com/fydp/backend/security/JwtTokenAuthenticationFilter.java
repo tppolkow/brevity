@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-// source: https://github.com/callicoder/spring-boot-react-oauth2-social-login-demo
+// source: https://www.callicoder.com/spring-boot-security-oauth2-social-login-part-2/
 
 public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
 
