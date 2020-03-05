@@ -40,7 +40,7 @@ class ChapterSelectorList extends React.Component {
     };
 
     post(Config.serverUrl + "/upload/chapters", reqBody)
-      .then(res => this.setState({ goToSummary: true, }));
+      .then(res => this.setState({ goToSummary: true, data: { summaryIds: res.data } }));
   }
 
   chapterItems(chapters) {
@@ -74,7 +74,7 @@ class ChapterSelectorList extends React.Component {
             </Form>
           </Col>
         </Row>
-        {this.state.goToSummary && <Redirect to={{ pathname: "/summary", state: this.state.data }} />}
+        {this.state.goToSummary && <Redirect to={{ pathname: "/summary", state: { data: this.state.data } }} />}
       </div>
     );
   }

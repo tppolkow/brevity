@@ -31,7 +31,7 @@ class DocumentUploadForm extends React.Component {
     post(this.props.endpoint, formData)
       .then(res => {
         if (res.data.pdfText !== '') {
-          this.setState({ goToSummary: true });
+          this.setState({ goToSummary: true, data: { summaryIds: { Summary: res.data.summaryId }} });
         } else {
           this.setState({ goToChapterSelect: true, data: res.data });
         }
