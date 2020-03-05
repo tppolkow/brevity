@@ -1,7 +1,7 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { post } from 'axios';
-import { Row, Col } from 'react-bootstrap';
+import { Row, Col, Spinner } from 'react-bootstrap';
 import Dropzone from 'react-dropzone';
 import './DocumentUploadForm.css';
 
@@ -14,7 +14,8 @@ class DocumentUploadForm extends React.Component {
     this.state = {
       goToChapterSelect: false,
       goToSummary: false,
-      data: {}
+      data: {},
+      uploading: false
     };
 
     this.handleDrop = this.handleDrop.bind(this);
@@ -22,6 +23,8 @@ class DocumentUploadForm extends React.Component {
   }
 
   handleDrop(files) {
+    this.setState({ uploading: true });
+
     const formData = new FormData();
     formData.append("file", files[0]);
 
@@ -47,12 +50,20 @@ class DocumentUploadForm extends React.Component {
               Start by uploading a PDF document below!
             </p>
             <h3>Upload a PDF</h3>
-            <Dropzone onDrop={this.handleDrop}>
+            <Dropzone onDrop={this.handleDrop} disabled={this.state.uploading}>
               {({getRootProps, getInputProps}) => (
                 <section className="dnd-upload-container">
                   <div {...getRootProps()}>
                     <input {...getInputProps()} />
-                    <p>Drag 'n' drop some files here, or click to select files</p>
+                    {
+                      this.state.uploading ?
+                        <div className="spinner-container">
+                          <Spinner animation="border" role="status" variant="primary">
+                            <span className="sr-only">Loading...</span>
+                          </Spinner>
+                        </div> :
+                        <p>Drag 'n' drop some files here, or click to select files</p>
+                    }
                   </div>
                 </section>
               )}

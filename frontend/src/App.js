@@ -22,7 +22,7 @@ class App extends React.Component {
       <Router>
         <div className="App">
           <Navbar bg="dark" variant="dark" expand="lg">
-            <Navbar.Brand href="/">
+            <Navbar.Brand as={Link} to="/">
               <img
                 alt="Brevity"
                 src={logo}

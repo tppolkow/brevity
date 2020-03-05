@@ -1,7 +1,7 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { post } from 'axios';
-import { Button, Form } from 'react-bootstrap';
+import { Button, Form, Row, Col } from 'react-bootstrap';
 import Config from './Config';
 import './ChapterSelectorList.css';
 
@@ -65,11 +65,15 @@ class ChapterSelectorList extends React.Component {
 
     return (
       <div>
-        <Form onSubmit={this.handleSubmit}>
-          <h4><Form.Label>Select chapters to summarize</Form.Label></h4>
-          {this.chapterItems(chapters)}
-          <Button variant="primary" type="submit">Select</Button>
-        </Form>
+        <Row>
+          <Col lg={{ span: 8, offset: 2 }}>
+            <h3 className="heading">Select chapters to summarize</h3>
+            <Form onSubmit={this.handleSubmit}>
+              {this.chapterItems(chapters)}
+              <Button variant="primary" type="submit">Select</Button>
+            </Form>
+          </Col>
+        </Row>
         {this.state.goToSummary && <Redirect to={{ pathname: "/summary", state: this.state.data }} />}
       </div>
     );
