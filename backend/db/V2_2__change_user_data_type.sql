@@ -1,1 +1,0 @@
-ALTER TABLE brevity.user ALTER COLUMN id TYPE varchar(25), ALTER COLUMN email TYPE varchar(254);
