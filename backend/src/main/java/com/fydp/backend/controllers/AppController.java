@@ -120,6 +120,10 @@ public class AppController {
             pdfInfo.setSummaryId(0L);
         } else {
             logger.info("No bookmarks found in PDF. Summarizing entire document.");
+
+            // Clear chapters at it may still be set from previous calls to this endpoint
+            pdfInfo.setChapters(null);
+
             String pdfText = new PDFTextStripper().getText(document);
             pdfInfo.setPdfText(pdfText);
 
@@ -131,7 +135,6 @@ public class AppController {
                 //send text with associated summary id to kafka
                 producer.sendMessageWithKey(pdfText, summary_id);
             }
-
         }
 
         pdfInfo.setFileName(file.getOriginalFilename());

@@ -1,0 +1,19 @@
+.blurb {
+    margin-bottom: 28px;
+}
+
+.dnd-upload-container {
+    margin-top: 20px;
+    text-align: center;
+    background-color: #e0effc;
+    border-radius: 2px;
+    border: 1px dashed #1675c6;
+}
+
+.dnd-upload-container p {
+    margin: 0;
+    height: 100px;
+    line-height: 100px;
+    cursor: pointer;
+    color: #187fd8;
+}

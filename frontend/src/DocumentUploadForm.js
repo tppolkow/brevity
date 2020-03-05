@@ -1,7 +1,11 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { post } from 'axios';
-import { Button, Form } from 'react-bootstrap';
+import { Row, Col } from 'react-bootstrap';
+import Dropzone from 'react-dropzone';
+import './DocumentUploadForm.css';
+
+
 
 class DocumentUploadForm extends React.Component {
   constructor(props) {
@@ -13,15 +17,13 @@ class DocumentUploadForm extends React.Component {
       data: {}
     };
 
-    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleDrop = this.handleDrop.bind(this);
     this.fileInput = React.createRef();
   }
 
-  handleSubmit(e) {
-    e.preventDefault();
-
+  handleDrop(files) {
     const formData = new FormData();
-    formData.append("file", this.fileInput.current.files[0]);
+    formData.append("file", files[0]);
 
     post(this.props.endpoint, formData)
       .then(res => {
@@ -35,14 +37,28 @@ class DocumentUploadForm extends React.Component {
 
   render() {
     return (
-      <div>
-        <Form className="upload-form" onSubmit={this.handleSubmit} encType="multipart/form-data">
-          <Form.Group controlId="uploadFile">
-            <h4><Form.Label>Upload PDF</Form.Label></h4>
-            <Form.Control type="file" ref={this.fileInput} name="file" />
-          </Form.Group>
-          <Button variant="primary" type="submit">Upload</Button>
-        </Form>
+      <div className="page">
+        <Row>
+          <Col lg={{span: 8, offset: 2}}>
+            <h1>Summarizer</h1>
+            <p className="blurb">
+              Brevity is a tool for generating summaries from textbook PDFs.
+              <br/>
+              Start by uploading a PDF document below!
+            </p>
+            <h3>Upload a PDF</h3>
+            <Dropzone onDrop={this.handleDrop}>
+              {({getRootProps, getInputProps}) => (
+                <section className="dnd-upload-container">
+                  <div {...getRootProps()}>
+                    <input {...getInputProps()} />
+                    <p>Drag 'n' drop some files here, or click to select files</p>
+                  </div>
+                </section>
+              )}
+            </Dropzone>
+          </Col>
+        </Row>
         {this.state.goToChapterSelect && <Redirect to={{ pathname: "/chapter-select", state: { data: this.state.data } }} />}
         {this.state.goToSummary && <Redirect to={{ pathname: "/summary", state: { data: this.state.data } }} />}
       </div>
