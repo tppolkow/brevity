@@ -323,7 +323,7 @@ public class AppController {
      */
     private List<Bookmark> findChapters(List<Bookmark> bookmarks, String chapterRegex) {
         var chapters = new ArrayList<Bookmark>();
-        var pattern = Pattern.compile(chapterRegex);
+        var pattern = Pattern.compile(chapterRegex, Pattern.CASE_INSENSITIVE);
         for (var b : bookmarks) {
             var match = pattern.matcher(b.getTitle());
             if (match.find()) {
