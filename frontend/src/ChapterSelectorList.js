@@ -42,7 +42,7 @@ class ChapterSelectorList extends React.Component {
     let config = { headers: { Authorization: 'Bearer ' + localStorage.getItem(ACCESS_TOKEN) }}
 
     post(BASE_URLS.serverUrl + "/upload/chapters", reqBody, config)
-      .then(res => this.setState({ goToSummary: true, data: { summaryIds: res.data } }));
+      .then(res => this.setState({ goToSummary: true, data: { summaryIds: res.data, fromChapterSelect: true } }));
   }
 
   chapterItems(chapters) {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { get } from 'axios';
-import { Row, Col, Card } from 'react-bootstrap';
+import { Row, Col, Card, Button } from 'react-bootstrap';
 import  { BASE_URLS, ACCESS_TOKEN } from './Constants';
 import './SummaryViewer.css';
 
@@ -30,7 +30,10 @@ class SummaryViewer extends React.Component {
   constructor(props) {
     super(props);
     this.props = props;
-    this.state = { summaries: {} };
+    this.state = {
+      summaries: {},
+      fromChapterSelect: this.props.location.state.data.fromChapterSelect || false
+     };
   }
 
   componentDidMount() {
@@ -83,6 +86,7 @@ class SummaryViewer extends React.Component {
               <br/>
               When we're done, we'll put your {this.state.summaries.length === 1 ? "summary" : "summaries"} below.
             </p>
+            {this.state.fromChapterSelect && <Button>Go back to Chapter Select</Button>}
             {this.summaryItems(summaries)}
           </Col>
         </Row>
