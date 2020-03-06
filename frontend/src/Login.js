@@ -16,18 +16,14 @@ class Login extends React.Component {
         return(
             <Container className="login-container">
                 <Row className="login-logo">
-                    <Col></Col>
-                    <Col md={6}>
+                    <Col md={{span: 6, offset: 3}}>
                         <Image className="brevity-logo" src={brevityLogo} alt="brevity logo" />
                     </Col>
-                    <Col></Col>
                 </Row>
                 <Row className="login-content">
-                    <Col></Col>
-                    <Col md={6}>
+                    <Col md={{span: 6, offset: 3}}>
                         <GoogleButton className="google-button" onClick={() => window.location.href=GOOGLE_AUTH_URL} />
                     </Col>
-                    <Col></Col>
                 </Row>
             </Container>
         )
