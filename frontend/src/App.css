@@ -4,7 +4,7 @@ body {
 }
 
 .App .container {
-  padding-top: 24px;
+  padding-top: 36px;
   padding-bottom: 40px;
   background-color: #fff;
 }
@@ -13,7 +13,7 @@ body {
   font-family: 'Bitter', serif;
   color: #1675c6;
   display: inline-block;
-  font-size: 40px;
+  font-size: 36px;
   vertical-align: middle;
   margin-left: 10px;
 }

@@ -26,7 +26,7 @@ class App extends React.Component {
               <img
                 alt="Brevity"
                 src={logo}
-                width="50"
+                width="40"
                 className="d-inline-block"
               />{' '}
               Brevity

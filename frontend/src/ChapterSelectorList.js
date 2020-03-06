@@ -68,9 +68,14 @@ class ChapterSelectorList extends React.Component {
         <Row>
           <Col lg={{ span: 8, offset: 2 }}>
             <h3 className="heading">Select chapters to summarize</h3>
+            <p>
+              We found chapters in your PDF that can be targeted for summarization!
+              <br/>
+              Select the ones you would like to summarize below.
+            </p>
             <Form onSubmit={this.handleSubmit}>
               {this.chapterItems(chapters)}
-              <Button variant="primary" type="submit">Select</Button>
+              <Button variant="primary" type="submit" className="submit-btn">Summarize</Button>
             </Form>
           </Col>
         </Row>

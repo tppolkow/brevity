@@ -2,6 +2,7 @@ import React from 'react';
 import { get } from 'axios';
 import { Row, Col, Card, Accordion } from 'react-bootstrap';
 import Config from './Config';
+import './SummaryViewer.css';
 
 function poll(fn, timeout, interval) {
     var endTime = Number(new Date()) + (timeout || 2000);
@@ -69,6 +70,18 @@ class SummaryViewer extends React.Component {
       <div>
         <Row>
           <Col lg={{ span: 10, offset: 1 }}>
+            {
+              this.state.summaries.length === 1 ?
+                <h3>Summary</h3> :
+                <h3>Summaries</h3>
+            }
+            <p className="blurb">
+              Your request is being processed!
+              <br/>
+              We may need a few minutes to make sure we can build the best summary possible.
+              <br/>
+              When we're done, we'll put your {this.state.summaries.length === 1 ? "summary" : "summaries"} below.
+            </p>
             {this.summaryItems(summaries)}
           </Col>
         </Row>
