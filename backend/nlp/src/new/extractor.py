@@ -1,5 +1,4 @@
 from heapq import nlargest
-
 from cleaner import Cleaner
 from grapher import Grapher
 from matrix_builder import MatrixBuilder
@@ -7,43 +6,50 @@ from cluster import Cluster
 from kafka import KafkaConsumer
 from kafka import KafkaProducer
 
+import logging
+
 
 class Extractor:
+    logging.basicConfig(format='%(asctime)s - %(message)s',
+                        datefmt='%d-%b-%y %H:%M:%S', level=logging.INFO)
+
     @staticmethod
     def extract(raw_txt):
+        with open('nlp/src/new/out.txt', 'w') as file:
+            file.write(raw_txt)
+
         c = Cleaner()
         cleaned_text_list = c.clean(raw_txt)
 
-        print(len(cleaned_text_list))
-        print('Done cleaning')
-        # print(cleaned_text_list)
+        logging.info('Done cleaning')
+        logging.debug(len(cleaned_text_list))
+        logging.debug(cleaned_text_list)
 
-        m = MatrixBuilder()
-        matrix = m.build_sim_matrix(cleaned_text_list)
-        # print(matrix)
-        # print('Dimensions: {}'.format(matrix.shape))
+        matrix_builder = MatrixBuilder()
+        matrix = matrix_builder.build_sim_matrix(cleaned_text_list)
 
-        print('Done building sim matrix')
+        logging.info('Done building sim matrix')
+        logging.debug('Dimensions: {}'.format(matrix.shape))
+        logging.debug(matrix)
 
         g = Grapher()
         pageranks = g.graph(matrix)
-        # print(m.sentences)
-        # print(pageranks)
 
-        print('Generated graph and got pageranks')
+        logging.info('Generated graph and got pageranks')
+        logging.debug(pageranks)
 
         summary_length = int(0.2 * len(cleaned_text_list))
         top_ranked = nlargest(summary_length, pageranks, key=pageranks.get)
         top_ranked.sort()
         cl = Cluster()
         top_ranked = cl.splitIntoParagraph(top_ranked, 25)
-        print(top_ranked)
+
+        logging.debug(top_ranked)
 
         result = ''
         for paragraph in top_ranked:
             for key in paragraph:
-                top_ranked_sentence = m.sentences[key]
-                # print('.{}.'.format(top_ranked_sentence))
+                top_ranked_sentence = cleaned_text_list[key]
                 result += '{}. '.format(top_ranked_sentence)
             result += '<br /><br />\n'
 
@@ -65,6 +71,6 @@ for message in consumer:
 
     summary = ext.extract(raw_txt=text)
 
-    print(summary)
+    logging.info('Summary: \n{}'.format(summary))
 
     producer.send('brevity_responses', str.encode(summary), key=key.encode())
