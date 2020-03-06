@@ -29,7 +29,7 @@ class SummaryViewer extends React.Component {
       return (
         <div key={name}>
           <h5>{name}</h5>
-          <p>{summary}</p>
+          <div dangerouslySetInnerHTML={{__html: summary}} />
         </div>
       );
     });
