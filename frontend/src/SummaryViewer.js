@@ -1,6 +1,6 @@
 import React from 'react';
 import { get } from 'axios';
-import Config from './Config';
+import  { BASE_URLS, ACCESS_TOKEN } from './Constants';
 
 class SummaryViewer extends React.Component {
   constructor(props) {
@@ -15,9 +15,9 @@ class SummaryViewer extends React.Component {
       console.log("redirected to", this.state);
       console.log("props location state", props.location.state);
     } else {
-      get(Config.serverUrl + "/summaries").then(res => {
+      let config = { headers: { Authorization: 'Bearer ' + localStorage.getItem(ACCESS_TOKEN) }}
+      get(BASE_URLS.serverUrl + "/summaries", config).then(res => {
         this.setState({ summaries: res.data });
-        console.log("standalone", this.state);
       });
     }
   }

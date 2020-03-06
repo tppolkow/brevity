@@ -49,6 +49,7 @@ target/
 # IntelliJ #
 .idea/
 *.iml
+
 # Local Netlify folder
 .netlify
 
