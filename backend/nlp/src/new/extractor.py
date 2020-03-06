@@ -3,7 +3,7 @@ from heapq import nlargest
 from cleaner import Cleaner
 from grapher import Grapher
 from matrix_builder import MatrixBuilder
-from cluster import splitIntoParagraph
+from cluster import Cluster
 from kafka import KafkaConsumer
 from kafka import KafkaProducer
 
@@ -35,7 +35,8 @@ class Extractor:
         summary_length = int(0.2 * len(cleaned_text_list))
         top_ranked = nlargest(summary_length, pageranks, key=pageranks.get)
         top_ranked.sort()
-        top_ranked = splitIntoParagraph(top_ranked, 10)
+        cl = Cluster()
+        top_ranked = cl.splitIntoParagraph(top_ranked, 25)
         print(top_ranked)
 
         result = ''
