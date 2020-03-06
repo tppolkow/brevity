@@ -35,7 +35,7 @@ class Extractor:
         summary_length = int(0.2 * len(cleaned_text_list))
         top_ranked = nlargest(summary_length, pageranks, key=pageranks.get)
         top_ranked.sort()
-        top_ranked= splitIntoParagraph(top_ranked, 5)
+        top_ranked = splitIntoParagraph(top_ranked, 10)
         print(top_ranked)
 
         result = ''
