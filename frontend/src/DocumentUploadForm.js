@@ -3,9 +3,8 @@ import { Redirect } from 'react-router-dom';
 import { post } from 'axios';
 import { Row, Col, Spinner } from 'react-bootstrap';
 import Dropzone from 'react-dropzone';
+import { ACCESS_TOKEN } from './Constants'; 
 import './DocumentUploadForm.css';
-
-
 
 class DocumentUploadForm extends React.Component {
   constructor(props) {
@@ -28,7 +27,9 @@ class DocumentUploadForm extends React.Component {
     const formData = new FormData();
     formData.append("file", files[0]);
 
-    post(this.props.endpoint, formData)
+    let config = { headers: { Authorization: 'Bearer ' + localStorage.getItem(ACCESS_TOKEN) }}
+    
+    post(this.props.endpoint, formData, config)
       .then(res => {
         if (res.data.pdfText !== '') {
           this.setState({ goToSummary: true, data: { summaryIds: { Summary: res.data.summaryId }} });
@@ -40,7 +41,7 @@ class DocumentUploadForm extends React.Component {
 
   render() {
     return (
-      <div className="page">
+      <div>
         <Row>
           <Col lg={{span: 8, offset: 2}}>
             <h1>Summarizer</h1>

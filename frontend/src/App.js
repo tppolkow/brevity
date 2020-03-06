@@ -1,12 +1,14 @@
 import React from 'react';
-import { Container, Navbar, Nav } from 'react-bootstrap';
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
-import Config from './Config';
+import { Container } from 'react-bootstrap';
+import { BrowserRouter as Router, Route, Link, Switch } from 'react-router-dom';
 import ChapterSelectorList from './ChapterSelectorList';
 import DocumentUploadForm from './DocumentUploadForm';
 import SummaryViewer from './SummaryViewer';
-import logo from './brevity_icon_dark.png'
+import Oauth2RedirectHandler from './OauthRedirectHandler';
+import Login from './Login';
+import { BASE_URLS } from './Constants';
 import './App.css';
+import BrevityNavbar from './BrevityNavbar';
 
 class App extends React.Component {
   constructor(props) {
@@ -21,43 +23,24 @@ class App extends React.Component {
     return (
       <Router>
         <div className="App">
-          <Navbar bg="dark" variant="dark" expand="lg">
-            <Navbar.Brand as={Link} to="/">
-              <img
-                alt="Brevity"
-                src={logo}
-                width="40"
-                className="d-inline-block"
-              />{' '}
-              Brevity
-            </Navbar.Brand>
-            <Navbar.Toggle aria-controls="basic-navbar-nav" />
-            <Navbar.Collapse id="basic-navbar-nav">
-              <Nav className="mr-auto">
-                <Nav.Link as={Link} to="/">
-                  Summarizer
-                </Nav.Link>
-                <Nav.Link>
-                  Past Summaries
-                </Nav.Link>
-              </Nav>
-              <Navbar.Text>
-                {this.state.username}
-              </Navbar.Text>
-            </Navbar.Collapse>
-          </Navbar>
-          <Container>
-            <Route 
-              path="/" 
-              exact 
-              render={(props) => <DocumentUploadForm {...props} endpoint={Config.serverUrl + "/upload"}/>}
-            />
-            <Route path="/chapter-select" component={ChapterSelectorList} />
-            <Route path="/summary" component={SummaryViewer} />
-            <div className="footer">
-              Copyright &copy; 2020 Brevity. All Rights Reserved.
-            </div>
-          </Container>
+            <Switch>
+              <Route exact path="/" component={Login} />
+              <div>
+                <BrevityNavbar/>
+                <Container>
+                  <Route 
+                    path="/upload"  
+                    render={(props) => <DocumentUploadForm {...props} endpoint={BASE_URLS.serverUrl + "/upload"}/>}
+                  />
+                  <Route path="/chapter-select" component={ChapterSelectorList} />
+                  <Route path="/summary" component={SummaryViewer} />
+                  <Route path="/oauth2/redirect" component={Oauth2RedirectHandler} />
+                  <div className="footer">
+                    Copyright &copy; 2020 Brevity. All Rights Reserved.
+                  </div>
+                </Container>
+              </div>
+            </Switch>
         </div>
       </Router>
     );

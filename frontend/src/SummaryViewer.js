@@ -1,7 +1,7 @@
 import React from 'react';
 import { get } from 'axios';
-import { Row, Col, Card, Accordion } from 'react-bootstrap';
-import Config from './Config';
+import { Row, Col, Card } from 'react-bootstrap';
+import  { BASE_URLS, ACCESS_TOKEN } from './Constants';
 import './SummaryViewer.css';
 
 function poll(fn, timeout, interval) {
@@ -38,7 +38,8 @@ class SummaryViewer extends React.Component {
     const summaries = {};
     Object.entries(summaryIds).forEach(([name, id]) => {
       summaries[name] = "";
-      poll(() => get(`${Config.serverUrl}/summaries/${id}`), 10 * 60 * 1000, 1000)
+      let config = { headers: { Authorization: 'Bearer ' + localStorage.getItem(ACCESS_TOKEN) }}
+      poll(() => get(`${BASE_URLS.serverUrl}/summaries/${id}`, config), 10 * 60 * 1000, 1000)
         .then(res => {
           summaries[name] = res.data;
           this.setState({ summaries });

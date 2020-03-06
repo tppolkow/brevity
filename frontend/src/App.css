@@ -9,15 +9,6 @@ body {
   background-color: #fff;
 }
 
-.navbar-brand {
-  font-family: 'Bitter', serif;
-  color: #1675c6;
-  display: inline-block;
-  font-size: 36px;
-  vertical-align: middle;
-  margin-left: 10px;
-}
-
 .footer {
   margin-top: 60px;
   text-align: center;

@@ -27,7 +27,6 @@ public class FydpApplication {
 			public void addCorsMappings(CorsRegistry registry) {
 				logger.info("The url is: " + url);
 				registry.addMapping("/**").allowedOrigins(url);
-
 			}
 		};
 	}
