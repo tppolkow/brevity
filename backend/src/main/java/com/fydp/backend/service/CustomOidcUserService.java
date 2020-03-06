@@ -2,7 +2,6 @@ package com.fydp.backend.service;
 
 import com.fydp.backend.model.GoogleOAuth2UserInfo;
 import com.fydp.backend.model.User;
-import com.fydp.backend.persistence.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,13 +11,15 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class CustomOidcUserService extends OidcUserService {
 
     private static final Logger logger = LoggerFactory.getLogger(CustomOidcUserService.class);
 
     @Autowired
-    private UserRepository userRepository;
+    private UserServiceImpl userService;
 
     @Override
     public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
@@ -36,14 +37,12 @@ public class CustomOidcUserService extends OidcUserService {
     }
 
     private void saveUser(GoogleOAuth2UserInfo userInfo) {
-        User user = userRepository.findByEmail(userInfo.getEmail());
-        if (user == null) {
-            user = new User();
-        }
+        Optional<User> optionalUser = userService.findByEmail(userInfo.getEmail());
+        User user = optionalUser.orElseGet(User::new);
 
         user.setId(userInfo.getId());
         user.setName(userInfo.getName());
         user.setEmail(userInfo.getEmail());
-        userRepository.save(user);
+        userService.saveUser(user);
     }
 }

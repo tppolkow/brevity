@@ -1,8 +1,8 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { post } from 'axios';
+import { post, get } from 'axios';
 import { Button, Form } from 'react-bootstrap';
-import { ACCESS_TOKEN } from './Constants'; 
+import { ACCESS_TOKEN, BASE_URLS } from './Constants'; 
 
 class DocumentUploadForm extends React.Component {
   constructor(props) {
@@ -11,6 +11,7 @@ class DocumentUploadForm extends React.Component {
     this.state = {
       goToChapterSelect: false,
       goToSummary: false,
+      userName: "",
       data: {}
     };
 
@@ -26,7 +27,7 @@ class DocumentUploadForm extends React.Component {
 
     let config = { headers: { Authorization: 'Bearer ' + localStorage.getItem(ACCESS_TOKEN) }}
     
-    post(this.props.endpoint, formData, config)
+    post(BASE_URLS.serverUrl + '/upload', formData, config)
       .then(res => {
         if (res.data.pdfText !== '') {
           this.setState({ goToSummary: true });
@@ -34,6 +35,13 @@ class DocumentUploadForm extends React.Component {
           this.setState({ goToChapterSelect: true, data: res.data });
         }
       });
+  }
+
+  componentDidMount() {
+    let config = { headers: { Authorization: 'Bearer ' + localStorage.getItem(ACCESS_TOKEN) }}
+    get(BASE_URLS.serverUrl + '/auth/user', config).then(res => {
+      this.setState({ userName: res.data }) 
+    })
   }
 
   render() {
