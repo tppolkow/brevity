@@ -9,15 +9,13 @@ from kafka import KafkaProducer
 import logging
 import struct
 
+
 class Extractor:
     logging.basicConfig(format='%(asctime)s - %(message)s',
                         datefmt='%d-%b-%y %H:%M:%S', level=logging.INFO)
 
     @staticmethod
     def extract(raw_txt):
-        with open('nlp/src/new/out.txt', 'w') as file:
-            file.write(raw_txt)
-
         c = Cleaner()
         cleaned_text_list = c.clean(raw_txt)
 
@@ -38,13 +36,12 @@ class Extractor:
         logging.info('Generated graph and got pageranks')
         logging.debug(pageranks)
 
-        summary_length = int(0.2 * len(cleaned_text_list))
+        summary_length = int(0.05 * len(cleaned_text_list))
         top_ranked = nlargest(summary_length, pageranks, key=pageranks.get)
         top_ranked.sort()
+
         cl = Cluster()
-
         top_ranked = cl.splitIntoParagraph(top_ranked, 25)
-
 
         logging.debug(top_ranked)
         result = ''
@@ -66,7 +63,7 @@ ext = Extractor()
 for message in consumer:
     # unpack the summary id, set > for big endian, Q for unsigned long
     (key,) = struct.unpack('>Q', message.key)
-    print("Processing summary id :",key)
+    print("Processing summary id :", key)
 
     text_array = message.value.decode('utf-8')
     text = ''
@@ -77,5 +74,5 @@ for message in consumer:
 
     logging.info('Summary: \n{}'.format(summary))
 
-    producer.send('brevity_responses', str.encode(summary), struct.pack('>Q', key))
-
+    producer.send('brevity_responses', str.encode(summary),
+                  struct.pack('>Q', key))
