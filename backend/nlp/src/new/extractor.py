@@ -1,46 +1,62 @@
 from heapq import nlargest
-
 from cleaner import Cleaner
 from grapher import Grapher
 from matrix_builder import MatrixBuilder
+from cluster import Cluster
 from kafka import KafkaConsumer
 from kafka import KafkaProducer
+
+import logging
 import struct
 
+
 class Extractor:
+    logging.basicConfig(format='%(asctime)s - %(message)s',
+                        datefmt='%d-%b-%y %H:%M:%S', level=logging.INFO)
+
     @staticmethod
     def extract(raw_txt):
         c = Cleaner()
         cleaned_text_list = c.clean(raw_txt)
 
-        print(len(cleaned_text_list))
-        print('Done cleaning')
-        # print(cleaned_text_list)
+        logging.info('Done cleaning')
+        logging.debug(len(cleaned_text_list))
+        logging.debug(cleaned_text_list)
 
-        m = MatrixBuilder()
-        matrix = m.build_sim_matrix(cleaned_text_list)
-        # print(matrix)
-        # print('Dimensions: {}'.format(matrix.shape))
+        matrix_builder = MatrixBuilder()
+        matrix = matrix_builder.build_sim_matrix(cleaned_text_list)
 
-        print('Done building sim matrix')
+        logging.info('Done building sim matrix')
+        logging.debug('Dimensions: {}'.format(matrix.shape))
+        logging.debug(matrix)
 
         g = Grapher()
         pageranks = g.graph(matrix)
-        # print(m.sentences)
-        # print(pageranks)
 
-        print('Generated graph and got pageranks')
+        logging.info('Generated graph and got pageranks')
+        logging.debug(pageranks)
 
-        summary_length = int(0.2 * len(cleaned_text_list))
+        total_doc_size = len(cleaned_text_list)
+        if total_doc_size in range(0, 300):
+            summary_length = int(0.2 * total_doc_size)
+        elif total_doc_size in range(301, 800):
+            summary_length = int(0.1 * total_doc_size)
+        else:
+            summary_length = int(0.05 * total_doc_size)
+
         top_ranked = nlargest(summary_length, pageranks, key=pageranks.get)
         top_ranked.sort()
-        # print(result)
 
+        cl = Cluster()
+        top_ranked = cl.splitIntoParagraph(top_ranked, 25)
+
+        logging.debug(top_ranked)
         result = ''
-        for key in top_ranked:
-            top_ranked_sentence = m.sentences[key]
-            # print('.{}.'.format(top_ranked_sentence))
-            result += '{}. '.format(top_ranked_sentence)
+        for paragraph in top_ranked:
+            for key in paragraph:
+                top_ranked_sentence = cleaned_text_list[key]
+                result += '{}. '.format(top_ranked_sentence)
+            result += '\n\n'
 
         return result
 
@@ -54,7 +70,7 @@ ext = Extractor()
 for message in consumer:
     # unpack the summary id, set > for big endian, Q for unsigned long
     (key,) = struct.unpack('>Q', message.key)
-    print("Processing summary id :",key)
+    print("Processing summary id :", key)
 
     text_array = message.value.decode('utf-8')
     text = ''
@@ -63,7 +79,7 @@ for message in consumer:
 
     summary = ext.extract(raw_txt=text)
 
-    print(summary)
+    logging.info('Summary: \n{}'.format(summary))
 
-    producer.send('brevity_responses', str.encode(summary), struct.pack('>Q', key))
-
+    producer.send('brevity_responses', str.encode(summary),
+                  struct.pack('>Q', key))

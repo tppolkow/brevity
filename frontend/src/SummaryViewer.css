@@ -1,3 +1,8 @@
+
+.summary{
+	white-space:pre-wrap;
+}
+
 .blurb {
     margin-bottom: 14px;
 }

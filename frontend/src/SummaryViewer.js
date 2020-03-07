@@ -25,7 +25,6 @@ function poll(fn, timeout, interval) {
 
     return new Promise(checkCondition);
 }
-
 class SummaryViewer extends React.Component {
   constructor(props) {
     super(props);
@@ -57,12 +56,17 @@ class SummaryViewer extends React.Component {
   summaryItems(summaries) {
     return Object.entries(summaries).map(([name, summary], i) => {
       return (
+
         <Card key={i}>
-          <Card.Header>{name}</Card.Header>
-          <Card.Body>
-            {summary === "" ? "Generating summary..." : summary}
-          </Card.Body>
+            <Card.Header>{name}</Card.Header>
+            <div class="summary">
+              <Card.Body>
+                {summary === "" ? "Generating summary..." : summary}
+              </Card.Body>
+            </div>
         </Card>
+        
+
       );
     });
   }
