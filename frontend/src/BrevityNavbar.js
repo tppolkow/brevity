@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navbar, Nav } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import logo from './brevity_icon_dark.png';
+import logo from './img/brevity_icon_dark.png';
 import './BrevityNavbar.css';
 
 class BrevityNavbar extends React.Component {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { GOOGLE_AUTH_URL } from './Constants';
-import brevityLogo from './img/brevity-logo.png';
+import brevityLogo from './img/brevity_logo.png';
 import GoogleButton from 'react-google-button';
 import './Login.css';
 import { Container, Image, Row, Col } from 'react-bootstrap';
