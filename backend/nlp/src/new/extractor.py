@@ -36,7 +36,7 @@ class Extractor:
         top_ranked = nlargest(summary_length, pageranks, key=pageranks.get)
         top_ranked.sort()
         cl = Cluster()
-        top_ranked = cl.splitIntoParagraph(top_ranked, 5)
+        top_ranked = cl.splitIntoParagraph(top_ranked, 20)
         print(top_ranked)
 
         result = ''
