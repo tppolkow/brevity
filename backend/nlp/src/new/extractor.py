@@ -36,7 +36,7 @@ class Extractor:
         top_ranked = nlargest(summary_length, pageranks, key=pageranks.get)
         top_ranked.sort()
         cl = Cluster()
-        top_ranked = cl.splitIntoParagraph(top_ranked, 25)
+        top_ranked = cl.splitIntoParagraph(top_ranked, 5)
         print(top_ranked)
 
         result = ''
@@ -45,7 +45,7 @@ class Extractor:
                 top_ranked_sentence = m.sentences[key]
                 # print('.{}.'.format(top_ranked_sentence))
                 result += '{}. '.format(top_ranked_sentence)
-            result += '<br /><br />\n'
+            result += '\n\n'
 
         return result
 

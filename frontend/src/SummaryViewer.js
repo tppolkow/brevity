@@ -1,6 +1,7 @@
 import React from 'react';
 import { get } from 'axios';
 import Config from './Config';
+import './SummaryViewer.css';
 
 class SummaryViewer extends React.Component {
   constructor(props) {
@@ -29,7 +30,7 @@ class SummaryViewer extends React.Component {
       return (
         <div key={name}>
           <h5>{name}</h5>
-          <div dangerouslySetInnerHTML={{__html: summary}} />
+		  <div class="summary">{summary}</div>
         </div>
       );
     });
