@@ -1,5 +1,5 @@
 class Cluster:
-    def splitIntoParagraph(numlist,interval):
+    def splitIntoParagraph(self, numlist,interval):
         x, y = 0,0
         paragraph = []
         while (y < len(numlist) - 1):

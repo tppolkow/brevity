@@ -42,6 +42,7 @@ class Extractor:
         top_ranked = nlargest(summary_length, pageranks, key=pageranks.get)
         top_ranked.sort()
         cl = Cluster()
+
         top_ranked = cl.splitIntoParagraph(top_ranked, 25)
 
         logging.debug(top_ranked)
@@ -51,7 +52,7 @@ class Extractor:
             for key in paragraph:
                 top_ranked_sentence = cleaned_text_list[key]
                 result += '{}. '.format(top_ranked_sentence)
-            result += '<br /><br />\n'
+            result += '\n\n'
 
         return result
 
