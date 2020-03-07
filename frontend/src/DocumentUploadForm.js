@@ -1,8 +1,10 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { post, get } from 'axios';
-import { Button, Form } from 'react-bootstrap';
+import { Row, Col, Spinner } from 'react-bootstrap';
+import Dropzone from 'react-dropzone';
 import { ACCESS_TOKEN, BASE_URLS } from './Constants'; 
+import './DocumentUploadForm.css';
 
 class DocumentUploadForm extends React.Component {
   constructor(props) {
@@ -11,26 +13,27 @@ class DocumentUploadForm extends React.Component {
     this.state = {
       goToChapterSelect: false,
       goToSummary: false,
+      data: {},
+      uploading: false,
       userName: "",
-      data: {}
     };
 
-    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleDrop = this.handleDrop.bind(this);
     this.fileInput = React.createRef();
   }
 
-  handleSubmit(e) {
-    e.preventDefault();
+  handleDrop(files) {
+    this.setState({ uploading: true });
 
     const formData = new FormData();
-    formData.append("file", this.fileInput.current.files[0]);
+    formData.append("file", files[0]);
 
     let config = { headers: { Authorization: 'Bearer ' + localStorage.getItem(ACCESS_TOKEN) }}
     
     post(BASE_URLS.serverUrl + '/upload', formData, config)
       .then(res => {
         if (res.data.pdfText !== '') {
-          this.setState({ goToSummary: true });
+          this.setState({ goToSummary: true, data: { summaryIds: { Summary: res.data.summaryId }} });
         } else {
           this.setState({ goToChapterSelect: true, data: res.data });
         }
@@ -47,13 +50,35 @@ class DocumentUploadForm extends React.Component {
   render() {
     return (
       <div>
-        <Form className="upload-form" onSubmit={this.handleSubmit} encType="multipart/form-data">
-          <Form.Group controlId="uploadFile">
-            <h4><Form.Label>Upload PDF</Form.Label></h4>
-            <Form.Control type="file" ref={this.fileInput} name="file" />
-          </Form.Group>
-          <Button variant="primary" type="submit">Upload</Button>
-        </Form>
+        <Row>
+          <Col lg={{span: 8, offset: 2}}>
+            <h1>Summarizer</h1>
+            <p className="blurb">
+              Brevity is a tool for generating summaries from textbook PDFs.
+              <br/>
+              Start by uploading a PDF document below!
+            </p>
+            <h3>Upload a PDF</h3>
+            <Dropzone onDrop={this.handleDrop} disabled={this.state.uploading}>
+              {({getRootProps, getInputProps}) => (
+                <section className="dnd-upload-container">
+                  <div {...getRootProps()}>
+                    <input {...getInputProps()} />
+                    {
+                      this.state.uploading ?
+                        <div className="spinner-container">
+                          <Spinner animation="border" role="status" variant="primary">
+                            <span className="sr-only">Loading...</span>
+                          </Spinner>
+                        </div> :
+                        <p>Drag 'n' drop some files here, or click to select files</p>
+                    }
+                  </div>
+                </section>
+              )}
+            </Dropzone>
+          </Col>
+        </Row>
         {this.state.goToChapterSelect && <Redirect to={{ pathname: "/chapter-select", state: { data: this.state.data } }} />}
         {this.state.goToSummary && <Redirect to={{ pathname: "/summary", state: { data: this.state.data } }} />}
       </div>

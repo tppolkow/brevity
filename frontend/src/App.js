@@ -6,30 +6,41 @@ import DocumentUploadForm from './DocumentUploadForm';
 import SummaryViewer from './SummaryViewer';
 import Oauth2RedirectHandler from './OauthRedirectHandler';
 import Login from './Login';
+import { BASE_URLS } from './Constants';
 import './App.css';
+import BrevityNavbar from './BrevityNavbar';
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.props = props;
+    this.state = {
+      username: 'Bob'
+    };
   }
 
   render() {
     return (
       <Router>
         <div className="App">
-          <Container>
             <Switch>
               <Route exact path="/" component={Login} />
-              <Route 
-                path="/upload"  
-                render={(props) => <DocumentUploadForm {...props} />}
-              />
-              <Route path="/chapter-select" component={ChapterSelectorList} />
-              <Route path="/summary" component={SummaryViewer} />
-              <Route path="/oauth2/redirect" component={Oauth2RedirectHandler} />
+              <div>
+                <BrevityNavbar/>
+                <Container>
+                  <Route 
+                    path="/upload"  
+                    render={(props) => <DocumentUploadForm {...props} />}
+                  />
+                  <Route path="/chapter-select" component={ChapterSelectorList} />
+                  <Route path="/summary" component={SummaryViewer} />
+                  <Route path="/oauth2/redirect" component={Oauth2RedirectHandler} />
+                  <div className="footer">
+                    Copyright &copy; 2020 Brevity. All Rights Reserved.
+                  </div>
+                </Container>
+              </div>
             </Switch>
-          </Container>
         </div>
       </Router>
     );

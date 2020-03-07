@@ -90,29 +90,19 @@ public class AppController {
     @GetMapping(value = ("/summaries/{id}"))
     public Map<String, String> getSummaries(@PathVariable String id, @RequestHeader(value="Authorization") String bearerToken) throws InterruptedException {
         logger.info("GET summary endpoint hit");
+
         Long summary_id = Long.parseLong(id);
-
-        // wait up to 30s for summary to finish
-        long end = System.currentTimeMillis() + 30000;
-
         Map<String, String> ret = new HashMap<>();
 
-        while (System.currentTimeMillis() < end) {
-            var summary = summaryService.findById(summary_id);
+        var summary = summaryService.findById(summary_id);
+        if (summary.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No summary job for this id");
+        }
 
-            if (summary.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No summary job for this id");
-            }
-
-            var summ = summary.get();
-
-            if (summ.isFinished()){
-                ret.put("title", summ.getTitle());
-                ret.put("data", summ.getData());
-                break;
-            }
-
-            TimeUnit.SECONDS.sleep(5);
+        var summ = summary.get();
+        if (summ.isFinished()){
+            ret.put("title", summ.getTitle());
+            ret.put("data", summ.getData());
         }
 
         if (ret.isEmpty()) throw new ResponseStatusException(HttpStatus.ACCEPTED, "Summary still processing");
@@ -148,6 +138,10 @@ public class AppController {
             pdfInfo.setSummaryId(0L);
         } else {
             logger.info("No bookmarks found in PDF. Summarizing entire document.");
+
+            // Clear chapters at it may still be set from previous calls to this endpoint
+            pdfInfo.setChapters(null);
+
             String pdfText = new PDFTextStripper().getText(document);
             pdfInfo.setPdfText(pdfText);
 
@@ -159,7 +153,6 @@ public class AppController {
                 //send text with associated summary id to kafka
                 producer.sendMessageWithKey(pdfText, summary_id);
             }
-
         }
 
         pdfInfo.setFileName(file.getOriginalFilename());
