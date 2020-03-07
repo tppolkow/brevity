@@ -36,7 +36,14 @@ class Extractor:
         logging.info('Generated graph and got pageranks')
         logging.debug(pageranks)
 
-        summary_length = int(0.05 * len(cleaned_text_list))
+        total_doc_size = len(cleaned_text_list)
+        if total_doc_size in range(0, 300):
+            summary_length = int(0.2 * total_doc_size)
+        elif total_doc_size in range(301, 800):
+            summary_length = int(0.1 * total_doc_size)
+        else:
+            summary_length = int(0.05 * total_doc_size)
+
         top_ranked = nlargest(summary_length, pageranks, key=pageranks.get)
         top_ranked.sort()
 
