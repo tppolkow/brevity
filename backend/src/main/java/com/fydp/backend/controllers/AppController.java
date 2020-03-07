@@ -3,7 +3,10 @@ package com.fydp.backend.controllers;
 import com.fydp.backend.kafka.KafkaProducer;
 import com.fydp.backend.model.Bookmark;
 import com.fydp.backend.model.PdfInfo;
+import com.fydp.backend.model.User;
+import com.fydp.backend.security.TokenUtil;
 import com.fydp.backend.service.SummaryService;
+import com.fydp.backend.service.UserServiceImpl;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.interactive.action.PDActionGoTo;
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDNamedDestination;
@@ -53,14 +56,39 @@ public class AppController {
     @Autowired
     private SummaryService summaryService;
 
+    @Autowired
+    private UserServiceImpl userService;
+
+    @Autowired
+    private TokenUtil tokenUtil;
+
     @RequestMapping("/")
     public String welcome() {
         logger.debug("Welcome endpoint hit");
         return "index";
     }
 
+    @GetMapping(value="/auth/user")
+    public String getAuthenticatedUser(@RequestHeader(value="Authorization") String bearerToken) {
+        logger.info("Getting authenticated username");
+        String jwt = tokenUtil.getJwtfromRequest(bearerToken);
+        if (jwt != null) {
+            String id = tokenUtil.getIdFromToken(jwt);
+            Optional<User> optionalUser = userService.findById(id);
+            User user;
+            if (optionalUser.isPresent()) {
+                user = optionalUser.get();
+                return user.getName();
+            } else {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User is not found");
+            }
+        } else {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied, request does not contain required token");
+        }
+    }
+
     @GetMapping(value = ("/summaries/{id}"))
-    public Map<String, String> getSummaries(@PathVariable String id) throws InterruptedException {
+    public Map<String, String> getSummaries(@PathVariable String id, @RequestHeader(value="Authorization") String bearerToken) throws InterruptedException {
         logger.info("GET summary endpoint hit");
 
         Long summary_id = Long.parseLong(id);

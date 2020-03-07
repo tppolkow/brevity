@@ -1,9 +1,9 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { post } from 'axios';
+import { post, get } from 'axios';
 import { Row, Col, Spinner } from 'react-bootstrap';
 import Dropzone from 'react-dropzone';
-import { ACCESS_TOKEN } from './Constants'; 
+import { ACCESS_TOKEN, BASE_URLS } from './Constants'; 
 import './DocumentUploadForm.css';
 
 class DocumentUploadForm extends React.Component {
@@ -14,7 +14,8 @@ class DocumentUploadForm extends React.Component {
       goToChapterSelect: false,
       goToSummary: false,
       data: {},
-      uploading: false
+      uploading: false,
+      userName: "",
     };
 
     this.handleDrop = this.handleDrop.bind(this);
@@ -29,7 +30,7 @@ class DocumentUploadForm extends React.Component {
 
     let config = { headers: { Authorization: 'Bearer ' + localStorage.getItem(ACCESS_TOKEN) }}
     
-    post(this.props.endpoint, formData, config)
+    post(BASE_URLS.serverUrl + '/upload', formData, config)
       .then(res => {
         if (res.data.pdfText !== '') {
           this.setState({ goToSummary: true, data: { summaryIds: { Summary: res.data.summaryId }} });
@@ -37,6 +38,13 @@ class DocumentUploadForm extends React.Component {
           this.setState({ goToChapterSelect: true, data: res.data });
         }
       });
+  }
+
+  componentDidMount() {
+    let config = { headers: { Authorization: 'Bearer ' + localStorage.getItem(ACCESS_TOKEN) }}
+    get(BASE_URLS.serverUrl + '/auth/user', config).then(res => {
+      this.setState({ userName: res.data }) 
+    })
   }
 
   render() {
