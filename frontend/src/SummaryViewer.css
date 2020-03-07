@@ -1,3 +1,17 @@
+
 .summary{
 	white-space:pre-wrap;
+}
+
+.blurb {
+    margin-bottom: 14px;
+}
+
+.card {
+    margin-top: 20px;
+}
+
+.card-header {
+    font-weight: bold;
+    font-size: 18px;
 }

@@ -12,13 +12,13 @@ public class KafkaProducer {
     private String topicName;
 
     @Autowired
-    private KafkaTemplate<String, String> kafkaTemplate;
+    private KafkaTemplate<Long, String> kafkaTemplate;
 
     public void sendMessage(String msg) {
         kafkaTemplate.send(topicName, msg);
     }
 
-    public void sendMessageWithKey(String msg, String key) {
+    public void sendMessageWithKey(String msg, Long key) {
         kafkaTemplate.send(topicName, key, msg);
     }
 

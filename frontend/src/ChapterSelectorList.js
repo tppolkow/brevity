@@ -1,9 +1,9 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { post } from 'axios';
-import { Button, Form } from 'react-bootstrap';
-import Config from './Config';
+import { Button, Form, Row, Col } from 'react-bootstrap';
 import './ChapterSelectorList.css';
+import { BASE_URLS, ACCESS_TOKEN } from './Constants';
 
 class ChapterSelectorList extends React.Component {
   constructor(props) {
@@ -39,8 +39,10 @@ class ChapterSelectorList extends React.Component {
       chapters: selectedChapters
     };
 
-    post(Config.serverUrl + "/upload/chapters", reqBody)
-      .then(res => this.setState({ goToSummary: true, }));
+    let config = { headers: { Authorization: 'Bearer ' + localStorage.getItem(ACCESS_TOKEN) }}
+
+    post(BASE_URLS.serverUrl + "/upload/chapters", reqBody, config)
+      .then(res => this.setState({ goToSummary: true, data: { summaryIds: res.data, fromChapterSelect: true } }));
   }
 
   chapterItems(chapters) {
@@ -65,12 +67,21 @@ class ChapterSelectorList extends React.Component {
 
     return (
       <div>
-        <Form onSubmit={this.handleSubmit}>
-          <h4><Form.Label>Select chapters to summarize</Form.Label></h4>
-          {this.chapterItems(chapters)}
-          <Button variant="primary" type="submit">Select</Button>
-        </Form>
-        {this.state.goToSummary && <Redirect to={{ pathname: "/summary", state: this.state.data }} />}
+        <Row>
+          <Col lg={{ span: 8, offset: 2 }}>
+            <h3 className="heading">Select chapters to summarize</h3>
+            <p>
+              We found chapters in your PDF that can be targeted for summarization!
+              <br/>
+              Select the ones you would like to summarize below.
+            </p>
+            <Form onSubmit={this.handleSubmit}>
+              {this.chapterItems(chapters)}
+              <Button variant="primary" type="submit" className="submit-btn">Summarize</Button>
+            </Form>
+          </Col>
+        </Row>
+        {this.state.goToSummary && <Redirect to={{ pathname: "/summary", state: { data: this.state.data } }} />}
       </div>
     );
   }
