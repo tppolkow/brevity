@@ -46,7 +46,6 @@ class Extractor:
         top_ranked = cl.splitIntoParagraph(top_ranked, 25)
 
         logging.debug(top_ranked)
-
         result = ''
         for paragraph in top_ranked:
             for key in paragraph:
