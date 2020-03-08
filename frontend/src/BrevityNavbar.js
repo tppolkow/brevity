@@ -1,8 +1,8 @@
 import React from 'react';
-import { Navbar, Nav } from 'react-bootstrap';
+import { Nav, Navbar } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import logo from './img/brevity_icon_dark.png';
 import './BrevityNavbar.css';
+import logo from './img/brevity_icon_dark.png';
 
 class BrevityNavbar extends React.Component {
   render() {
@@ -22,10 +22,10 @@ class BrevityNavbar extends React.Component {
           <Nav className="mr-auto">
             <Nav.Link as={Link} to="/upload">
               Summarizer
-                </Nav.Link>
-            <Nav.Link>
+            </Nav.Link>
+            <Nav.Link as={Link} to="/past-summaries">
               Past Summaries
-                </Nav.Link>
+            </Nav.Link>
           </Nav>
           <Navbar.Text>
             Bob

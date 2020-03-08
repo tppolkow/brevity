@@ -1,9 +1,8 @@
 import React from 'react';
+import { Button, Col, Form, Row } from 'react-bootstrap';
 import { Redirect } from 'react-router-dom';
-import { post } from 'axios';
-import { Button, Form, Row, Col } from 'react-bootstrap';
 import './ChapterSelectorList.css';
-import { BASE_URLS, ACCESS_TOKEN } from './Constants';
+import { brevityHttpPost } from './Utilities';
 
 class ChapterSelectorList extends React.Component {
   constructor(props) {
@@ -39,9 +38,7 @@ class ChapterSelectorList extends React.Component {
       chapters: selectedChapters
     };
 
-    let config = { headers: { Authorization: 'Bearer ' + localStorage.getItem(ACCESS_TOKEN) }}
-
-    post(BASE_URLS.serverUrl + "/upload/chapters", reqBody, config)
+    brevityHttpPost("/upload/chapters", reqBody)
       .then(res => this.setState({ goToSummary: true, data: { summaryIds: res.data, fromChapterSelect: true } }));
   }
 
