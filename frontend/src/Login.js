@@ -1,5 +1,5 @@
 import React from 'react';
-import { Col, Container, Image, Row } from 'react-bootstrap';
+import { Container, Image } from 'react-bootstrap';
 import GoogleButton from 'react-google-button';
 import { GOOGLE_AUTH_URL } from './Constants';
 import brevityLogo from './img/brevity_logo.png';
