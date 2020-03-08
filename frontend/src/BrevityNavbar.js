@@ -32,9 +32,6 @@ class BrevityNavbar extends React.Component {
             <Nav.Link as={Link} to="/past-summaries">
               Past Summaries
             </Nav.Link>
-            <Nav.Link as={Link} to="/chapter-select">
-              Chapter Select
-            </Nav.Link>
           </Nav>
           <NavDropdown alignRight title="Profile">
             <NavDropdown.Header>Signed in as {this.state.username}</NavDropdown.Header>
