@@ -4,6 +4,7 @@ import re
 class Cleaner:
     @staticmethod
     def clean(text):
+        # Takes care of words like 'psych- ology' with weird spacing
         text = text.replace('-\n', '')
 
         # Remove all \n \r
@@ -43,7 +44,8 @@ class Cleaner:
                 index = sentences.index(sentence)
                 sentences[index] = ''
 
-        # Replace any sentence that have greater than 20 words with empty (should take care of those pesky headers)
+        # Replace any sentence that have greater than 20 words with empty
+        # (should take care of those pesky headers)
         max_number_of_words = 22.5
         for sentence in sentences:
             if len(sentence.split()) > max_number_of_words:
