@@ -3,6 +3,7 @@ package com.fydp.backend.controllers;
 import com.fydp.backend.kafka.KafkaProducer;
 import com.fydp.backend.model.Bookmark;
 import com.fydp.backend.model.PdfInfo;
+import com.fydp.backend.model.Summary;
 import com.fydp.backend.model.User;
 import com.fydp.backend.security.TokenUtil;
 import com.fydp.backend.service.SummaryService;
@@ -31,6 +32,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Note: A lot of code are basically recreating the PDF document as well as variables that should only be
@@ -46,6 +48,7 @@ public class AppController {
     private static final String UPLOAD_PATH = System.getProperty("user.dir") + "/upload_files/";
     private static final String END_OF_CHAPTER = "End of Last Chapter";
     private static final String CHAPTER_REGEX = "(\\bchapter|\\bch|\\bch\\.|\\bchap|\\bchap\\.|\\bpart|\\bsection|^)\\s*\\d+";
+    private static final int MAX_SUMMARIES_TO_RETURN = 10;
 
     @Autowired
     private PdfInfo pdfInfo;
@@ -101,7 +104,17 @@ public class AppController {
     public Map<String, String> getUserSummaries(@RequestHeader(value="Authorization") String bearerToken){
         logger.info("/summaries/user hit");
 
-        return null;
+        List<Summary> summaries = getUserFromBearerToken(bearerToken).getSummaries();
+        List<Summary> sortedSummaries = summaries.stream()
+                .sorted(Comparator.comparing(Summary::getSummary_id))
+                .collect(Collectors.toList());
+        Map<String, String> ret = new HashMap<>();
+
+        for (var summary : sortedSummaries){
+            if (summary.isFinished()) ret.put(summary.getTitle(), summary.getData());
+            if (ret.size() >= MAX_SUMMARIES_TO_RETURN) break;
+        }
+        return ret;
     }
 
     // returns pdfInfo which contains the summaryId to hit /summaries/{id}
