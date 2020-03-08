@@ -34,11 +34,32 @@ class Cleaner:
                 if index < len(sentences) - 1:
                     sentences[index + 1] = ''
 
-        # Replace any sentences that have less than 5 words with empty
+        # Replace any sentence that have less than 5 words with empty
+        min_number_of_words = 5
         for sentence in sentences:
-            if len(sentence.split()) < 5:
+            if len(sentence.split()) < min_number_of_words:
                 index = sentences.index(sentence)
                 sentences[index] = ''
+
+        # Replace all sentences with copyright with empty
+        for sentence in sentences:
+            is_match = re.search(u'(\N{COPYRIGHT SIGN}|\N{TRADE MARK SIGN}|'
+                                 u'\N{REGISTERED SIGN})', sentence)
+            if is_match:
+                index = sentences.index(sentence)
+                sentences[index] = ''
+
+        # Replace all sentences that have random spacing with empty
+        # Example: Psychology 43 c o n c e p t c h e c k 2.
+        for sentence in sentences:
+            sentence_index = sentences.index(sentence)
+            words = sentence.split()
+            for word in words:
+                word_index = words.index(word)
+                if word_index < len(words) - 1:
+                    next_word = words[word_index + 1]
+                    if len(word) == 1 and len(next_word) == 1:
+                        sentences[sentence_index] = ''
 
         # Drop any empty sentences
         sentences = list(filter(None, sentences))
