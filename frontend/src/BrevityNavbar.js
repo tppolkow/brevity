@@ -1,10 +1,16 @@
 import React from 'react';
-import { Nav, Navbar } from 'react-bootstrap';
+import { Nav, Navbar, NavDropdown } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import './BrevityNavbar.css';
 import logo from './img/brevity_icon_dark.png';
 
 class BrevityNavbar extends React.Component {
+  constructor(props) {
+    super(props);
+    this.props = props;
+    this.state = { username: "Bob" };
+  }
+
   render() {
     return (
       <Navbar bg="dark" variant="dark" expand="lg">
@@ -26,10 +32,14 @@ class BrevityNavbar extends React.Component {
             <Nav.Link as={Link} to="/past-summaries">
               Past Summaries
             </Nav.Link>
+            <Nav.Link as={Link} to="/chapter-select">
+              Chapter Select
+            </Nav.Link>
           </Nav>
-          <Navbar.Text>
-            Bob
-          </Navbar.Text>
+          <NavDropdown alignRight title="Profile">
+            <NavDropdown.Header>Signed in as {this.state.username}</NavDropdown.Header>
+            <NavDropdown.Item>Logout</NavDropdown.Item>
+          </NavDropdown>
         </Navbar.Collapse>
       </Navbar>
     );

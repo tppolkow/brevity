@@ -52,7 +52,7 @@ class DocumentUploadForm extends React.Component {
               Start by uploading a PDF document below!
             </p>
             <h3>Upload a PDF</h3>
-            <Dropzone onDrop={this.handleDrop} disabled={this.state.uploading}>
+            <Dropzone onDrop={this.handleDrop} disabled={this.state.uploading} accept=".pdf">
               {({getRootProps, getInputProps}) => (
                 <section className="dnd-upload-container">
                   <div {...getRootProps()}>
@@ -64,7 +64,7 @@ class DocumentUploadForm extends React.Component {
                             <span className="sr-only">Loading...</span>
                           </Spinner>
                         </div> :
-                        <p>Drag 'n' drop some files here, or click to select files</p>
+                        <p>Drag 'n' drop a PDF here, or click to select one</p>
                     }
                   </div>
                 </section>

@@ -9,7 +9,9 @@ class ChapterSelectorList extends React.Component {
     super(props);
     this.props = props;
     this.state = {
-      goToSummary: false
+      goToSummary: false,
+      checkedCount: 0,
+      checkedChapters: {}
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -18,13 +20,16 @@ class ChapterSelectorList extends React.Component {
 
   handleInputChange(e) {
     const target = e.target;
-    this.setState({ [target.id]: target.checked });
+    const newCheckedCount = (target.checked) ? this.state.checkedCount + 1 : this.state.checkedCount - 1;
+    const newCheckedChapter = this.state.checkedChapters;
+    newCheckedChapter[target.id] = target.checked;
+    this.setState({ checkedChapters: newCheckedChapter, checkedCount: newCheckedCount });
   }
 
   handleSubmit(e) {
     e.preventDefault();
 
-    const selectedChapters = Object.entries(this.state)
+    const selectedChapters = Object.entries(this.state.checkedChapters)
       .reduce((selected, [chapId, checked]) => {
           if (checked) {
             const id = chapId.split('-')[1];
@@ -74,7 +79,7 @@ class ChapterSelectorList extends React.Component {
             </p>
             <Form onSubmit={this.handleSubmit}>
               {this.chapterItems(chapters)}
-              <Button variant="primary" type="submit" className="submit-btn">Summarize</Button>
+              <Button variant="primary" type="submit" className="submit-btn" disabled={this.state.checkedCount === 0}>Summarize</Button>
             </Form>
           </Col>
         </Row>

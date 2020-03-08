@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Card, Col, Row, Spinner } from 'react-bootstrap';
+import { Card, Col, Row, Spinner } from 'react-bootstrap';
 import './SummaryViewer.css';
 import { brevityHttpGet, poll } from './Utilities';
 
@@ -10,10 +10,7 @@ class SummaryViewer extends React.Component {
   constructor(props) {
     super(props);
     this.props = props;
-    this.state = {
-      summaries: {},
-      fromChapterSelect: this.props.location.state.data.fromChapterSelect || false
-     };
+    this.state = { summaries: {} };
   }
 
   componentDidMount() {
@@ -27,10 +24,13 @@ class SummaryViewer extends React.Component {
           summaries[name] = res.data;
           this.setState({ summaries });
         })
-        .catch(err => console.log(`Could not fetch summary for ${name}`));
+        .catch((err) => {
+          summaries[name] = "Took too long to generate summary...Try refreshing the page or submitting a smaller job.";
+          this.setState({ summaries });
+        });
     });
 
-    this.setState({ summaries })
+    this.setState({ summaries });
   }
 
   summaryItems(summaries) {
@@ -49,9 +49,9 @@ class SummaryViewer extends React.Component {
             <div className="summary">
               {
                 summary !== "" &&
-                  <Card.Body>
-                    {summary}
-                  </Card.Body>
+                <Card.Body>
+                  {summary}
+                </Card.Body>
               }
             </div>
         </Card>
@@ -78,7 +78,6 @@ class SummaryViewer extends React.Component {
               <br/>
               When we're done, we'll put your {this.state.summaries.length === 1 ? "summary" : "summaries"} below.
             </p>
-            {this.state.fromChapterSelect && <Button>Go back to Chapter Select</Button>}
             {this.summaryItems(summaries)}
           </Col>
         </Row>
