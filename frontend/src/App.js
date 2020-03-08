@@ -6,6 +6,7 @@ import DocumentUploadForm from './DocumentUploadForm';
 import SummaryViewer from './SummaryViewer';
 import Oauth2RedirectHandler from './OauthRedirectHandler';
 import Login from './Login';
+import PrivateRoute from './PrivateRoute';
 import './App.css';
 
 class App extends React.Component {
@@ -21,12 +22,9 @@ class App extends React.Component {
           <Container>
             <Switch>
               <Route exact path="/" component={Login} />
-              <Route 
-                path="/upload"  
-                render={(props) => <DocumentUploadForm {...props} />}
-              />
-              <Route path="/chapter-select" component={ChapterSelectorList} />
-              <Route path="/summary" component={SummaryViewer} />
+              <PrivateRoute path="/upload" component={DocumentUploadForm} />
+              <PrivateRoute path="/chapter-select" component={ChapterSelectorList} />
+              <PrivateRoute path="/summary" component={SummaryViewer} />
               <Route path="/oauth2/redirect" component={Oauth2RedirectHandler} />
             </Switch>
           </Container>
