@@ -60,6 +60,13 @@ class Cleaner:
                 index = sentences.index(sentence)
                 sentences[index] = ''
 
+        # Remove any sentence with figure/table/Fig keywords
+        for sent in sentences:
+            index = sentences.index(sent)
+            sent = sent.lower()
+            if 'figure' in sent or 'table' in sent or 'fig' in sent:
+                sentences[index] = ''
+
         # Replace all sentences that have random spacing with empty
         # Example: Psychology 43 c o n c e p t c h e c k 2.
         for sentence in sentences:
