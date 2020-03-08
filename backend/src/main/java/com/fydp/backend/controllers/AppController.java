@@ -106,7 +106,7 @@ public class AppController {
 
         List<Summary> summaries = getUserFromBearerToken(bearerToken).getSummaries();
         List<Summary> sortedSummaries = summaries.stream()
-                .sorted(Comparator.comparing(Summary::getSummary_id))
+                .sorted(Comparator.comparing(Summary::getSummary_id, Comparator.reverseOrder()))
                 .collect(Collectors.toList());
         Map<String, String> ret = new HashMap<>();
 
