@@ -37,8 +37,10 @@ class Extractor:
         logging.debug(pageranks)
 
         total_doc_size = len(cleaned_text_list)
-        if total_doc_size in range(0, 300):
+        if total_doc_size in range(0, 150):
             summary_length = int(0.4 * total_doc_size)
+        elif total_doc_size in range(151, 300):
+            summary_length = int(0.3 * total_doc_size)
         elif total_doc_size in range(301, 800):
             summary_length = int(0.2 * total_doc_size)
         elif total_doc_size in range(801, 1500):
