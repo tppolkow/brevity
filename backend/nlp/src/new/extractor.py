@@ -38,8 +38,10 @@ class Extractor:
 
         total_doc_size = len(cleaned_text_list)
         if total_doc_size in range(0, 300):
-            summary_length = int(0.2 * total_doc_size)
+            summary_length = int(0.4 * total_doc_size)
         elif total_doc_size in range(301, 800):
+            summary_length = int(0.2 * total_doc_size)
+        elif total_doc_size in range(801, 1500):
             summary_length = int(0.1 * total_doc_size)
         else:
             summary_length = int(0.05 * total_doc_size)
