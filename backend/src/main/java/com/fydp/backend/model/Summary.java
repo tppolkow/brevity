@@ -7,7 +7,6 @@ import java.util.Objects;
 
 //model to interact with Summary table
 @Entity
-
 @Table(name = "summary", schema = "brevity")
 public class Summary {
 
@@ -15,16 +14,25 @@ public class Summary {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long summary_id;
 
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinTable(name="user_request",
+            schema="brevity",
+            joinColumns = {@JoinColumn(name="summary_id")},
+            inverseJoinColumns={@JoinColumn(name="id")}
+    )
+    private User user;
+
     private String title;
 
     private String data;
 
     private boolean finished;
 
-    public Summary(String title, String data, boolean finished) {
+    public Summary(String title, String data, boolean finished, User user) {
         this.title = title;
         this.data = data;
         this.finished = finished;
+        this.user = user;
     }
 
     public Summary(){}
@@ -59,6 +67,14 @@ public class Summary {
 
     public void setFinished(boolean finished) {
         this.finished = finished;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     @Override
