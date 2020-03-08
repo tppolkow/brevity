@@ -3,6 +3,7 @@ package com.fydp.backend.controllers;
 import com.fydp.backend.kafka.KafkaProducer;
 import com.fydp.backend.model.Bookmark;
 import com.fydp.backend.model.PdfInfo;
+import com.fydp.backend.model.Summary;
 import com.fydp.backend.model.User;
 import com.fydp.backend.security.TokenUtil;
 import com.fydp.backend.service.SummaryService;
@@ -31,6 +32,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Note: A lot of code are basically recreating the PDF document as well as variables that should only be
@@ -46,6 +48,7 @@ public class AppController {
     private static final String UPLOAD_PATH = System.getProperty("user.dir") + "/upload_files/";
     private static final String END_OF_CHAPTER = "End of Last Chapter";
     private static final String CHAPTER_REGEX = "(\\bchapter|\\bch|\\bch\\.|\\bchap|\\bchap\\.|\\bpart|\\bsection|^)\\s*\\d+";
+    private static final int MAX_SUMMARIES_TO_RETURN = 10;
 
     @Autowired
     private PdfInfo pdfInfo;
@@ -71,20 +74,7 @@ public class AppController {
     @GetMapping(value="/auth/user")
     public String getAuthenticatedUser(@RequestHeader(value="Authorization") String bearerToken) {
         logger.info("Getting authenticated username");
-        String jwt = tokenUtil.getJwtfromRequest(bearerToken);
-        if (jwt != null) {
-            String id = tokenUtil.getIdFromToken(jwt);
-            Optional<User> optionalUser = userService.findById(id);
-            User user;
-            if (optionalUser.isPresent()) {
-                user = optionalUser.get();
-                return user.getName();
-            } else {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User is not found");
-            }
-        } else {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied, request does not contain required token");
-        }
+        return getUserFromBearerToken(bearerToken).getName();
     }
 
     @GetMapping(value = ("/summaries/{id}"))
@@ -110,10 +100,28 @@ public class AppController {
         return ret;
     }
 
+    @GetMapping(value = ("/summaries/user"))
+    public Map<String, String> getUserSummaries(@RequestHeader(value="Authorization") String bearerToken){
+        logger.info("/summaries/user hit");
+
+        List<Summary> summaries = getUserFromBearerToken(bearerToken).getSummaries();
+        List<Summary> sortedSummaries = summaries.stream()
+                .sorted(Comparator.comparing(Summary::getSummary_id, Comparator.reverseOrder()))
+                .collect(Collectors.toList());
+        Map<String, String> ret = new HashMap<>();
+
+        for (var summary : sortedSummaries){
+            if (summary.isFinished()) ret.put(summary.getTitle(), summary.getData());
+            if (ret.size() >= MAX_SUMMARIES_TO_RETURN) break;
+        }
+        return ret;
+    }
+
     // returns pdfInfo which contains the summaryId to hit /summaries/{id}
     @PostMapping(value = ("/upload"), headers = ("content-type=multipart/*"))
-    public PdfInfo upload(@RequestParam("file") MultipartFile file) throws IOException {
+    public PdfInfo upload(@RequestParam("file") MultipartFile file, @RequestHeader(value="Authorization") String bearerToken) throws IOException {
         logger.debug("Upload endpoint hit");
+        User user = getUserFromBearerToken(bearerToken);
 
         PDDocument document = parsePDF(loadPdfFile(file));
         if (document == null) {
@@ -146,7 +154,7 @@ public class AppController {
             pdfInfo.setPdfText(pdfText);
 
             //create the summary entry and get id of this summary
-            var summary_id = summaryService.createSummary("Summary");
+            var summary_id = summaryService.createSummary(file.getOriginalFilename(), user);
             pdfInfo.setSummaryId(summary_id);
 
             if (!pdfText.isEmpty()) {
@@ -164,7 +172,8 @@ public class AppController {
     //@return: returns map of chapter titles to summary_ids
     // can use these summary ids to hit the /summaries/{id} endpoint to retrieve summary for that chapter
     @PostMapping(value = "/upload/chapters", consumes = {MediaType.APPLICATION_JSON_VALUE})
-    public Map<String,Long> parseChapters(@RequestBody PdfInfo response) throws IOException {
+    public Map<String,Long> parseChapters(@RequestBody PdfInfo response, @RequestHeader(value="Authorization") String bearerToken) throws IOException {
+        User user = getUserFromBearerToken(bearerToken);
         List<Bookmark> chapters = response.getChapters();
         Map<String, Long> chapterIds = new HashMap<>();
         PDDocument document = parsePDF(new File(UPLOAD_PATH + response.getFileName()));
@@ -174,7 +183,7 @@ public class AppController {
                 reader.setStartPage(chapter.getStartPage());
                 reader.setEndPage(chapter.getEndPage() - 1);
 
-                var summary_id = summaryService.createSummary(chapter.getTitle());
+                var summary_id = summaryService.createSummary(chapter.getTitle(), user);
                 chapterIds.put(chapter.getTitle(), summary_id);
                 String rawText = reader.getText(document);
                 if (!rawText.isEmpty()) {
@@ -352,6 +361,23 @@ public class AppController {
             }
         }
         return chapters;
+    }
+
+    private User getUserFromBearerToken(String bearerToken){
+        String jwt = tokenUtil.getJwtfromRequest(bearerToken);
+        if (jwt != null) {
+            String id = tokenUtil.getIdFromToken(jwt);
+            Optional<User> optionalUser = userService.findById(id);
+            User user;
+            if (optionalUser.isPresent()) {
+                user = optionalUser.get();
+                return user;
+            } else {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User is not found");
+            }
+        } else {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied, request does not contain required token");
+        }
     }
 
 }

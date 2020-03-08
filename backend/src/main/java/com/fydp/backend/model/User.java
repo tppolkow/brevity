@@ -1,11 +1,10 @@
 package com.fydp.backend.model;
 
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @Entity
 @Table(name="user", schema="brevity")
@@ -13,6 +12,14 @@ public class User {
 
     @Id
     private String id;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name="user_request",
+            schema="brevity",
+            joinColumns = {@JoinColumn(name="id")},
+            inverseJoinColumns={@JoinColumn(name="summary_id")}
+    )
+    private List<Summary> summaries;
 
     @NotNull
     private String name;
@@ -44,5 +51,13 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public List<Summary> getSummaries() {
+        return summaries;
+    }
+
+    public void setSummaries(List<Summary> summaries) {
+        this.summaries = summaries;
     }
 }

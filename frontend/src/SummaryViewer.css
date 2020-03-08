@@ -1,5 +1,4 @@
-
-.summary{
+.summary {
 	white-space:pre-wrap;
 }
 
@@ -14,4 +13,10 @@
 .card-header {
     font-weight: bold;
     font-size: 18px;
+    display: flex;
+    align-items: center;
+}
+
+.card-header .spinner-border {
+    margin-left: 18px;
 }

@@ -54,3 +54,9 @@ target/
 .netlify
 
 backend/nlp/src/new/__pycache__/*
+
+# Java stuff
+.classpath
+*.project
+.settings
+

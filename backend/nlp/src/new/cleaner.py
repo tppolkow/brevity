@@ -4,6 +4,9 @@ import re
 class Cleaner:
     @staticmethod
     def clean(text):
+        # Takes care of words like 'psych- ology' with weird spacing
+        text = text.replace('-\n', '')
+
         # Remove all \n \r
         text = text.replace('\n', ' ')
         text = text.replace('\r', ' ')
@@ -41,12 +44,27 @@ class Cleaner:
                 index = sentences.index(sentence)
                 sentences[index] = ''
 
+        # Replace any sentence that have greater than 20 words with empty
+        # (should take care of those pesky headers)
+        max_number_of_words = 22.5
+        for sentence in sentences:
+            if len(sentence.split()) > max_number_of_words:
+                index = sentences.index(sentence)
+                sentences[index] = ''
+
         # Replace all sentences with copyright with empty
         for sentence in sentences:
             is_match = re.search(u'(\N{COPYRIGHT SIGN}|\N{TRADE MARK SIGN}|'
                                  u'\N{REGISTERED SIGN})', sentence)
             if is_match:
                 index = sentences.index(sentence)
+                sentences[index] = ''
+
+        # Remove any sentence with figure/table/Fig keywords
+        for sent in sentences:
+            index = sentences.index(sent)
+            sent = sent.lower()
+            if 'figure' in sent or 'table' in sent or 'fig' in sent:
                 sentences[index] = ''
 
         # Replace all sentences that have random spacing with empty
@@ -61,6 +79,22 @@ class Cleaner:
                     if len(word) == 1 and len(next_word) == 1:
                         sentences[sentence_index] = ''
 
+        # Replace all sentences that start with a number with empty
+        for sentence in sentences:
+            is_match = re.match(r'^([A-Z])', sentence)
+            if not is_match:
+                index = sentences.index(sentence)
+                sentences[index] = ''
+
+        # Replace all sentences that have any words in all CAPS
+        for sentence in sentences:
+            sentence_index = sentences.index(sentence)
+            words = sentence.split()
+            for word in words:
+                if word.isupper():
+                    sentences[sentence_index] = ''
+                    break
+        
         # Drop any empty sentences
         sentences = list(filter(None, sentences))
 

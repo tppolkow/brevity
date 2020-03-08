@@ -1,34 +1,31 @@
 import React from 'react';
+import { Container, Image } from 'react-bootstrap';
+import GoogleButton from 'react-google-button';
 import { GOOGLE_AUTH_URL } from './Constants';
 import brevityLogo from './img/brevity_logo.png';
-import GoogleButton from 'react-google-button';
 import './Login.css';
-import { Container, Image, Row, Col } from 'react-bootstrap';
 
 class Login extends React.Component {
-    constructor(props) {
-        super(props);
-        this.props = props;
-    }
+  constructor(props) {
+    super(props);
+    this.props = props;
+  }
 
-
-    render() {
-        return(
-            <Container className="login-container">
-                <Row className="login-logo">
-                    <Col md={{span: 6, offset: 3}}>
-                        <Image className="brevity-logo" src={brevityLogo} alt="brevity logo" />
-                    </Col>
-                </Row>
-                <Row className="login-content">
-                    <Col md={{span: 6, offset: 3}}>
-                        <GoogleButton className="google-button" onClick={() => window.location.href=GOOGLE_AUTH_URL} />
-                    </Col>
-                </Row>
-            </Container>
-        )
-    }
-
+  render() {
+    return (
+      <Container className="login-container">
+        <Image className="brevity-logo" src={brevityLogo} alt="brevity logo" />
+        <p>
+          Welcome to Brevity, a tool for summarizing textbook PDFs.
+          <br/>
+          We help you get the most important information from textbooks so you don't have to.
+          <br/>
+          Start by signing in with your Google account!
+        </p>
+        <GoogleButton className="google-button" onClick={() => window.location.href = GOOGLE_AUTH_URL} />
+      </Container>
+    );
+  }
 }
 
 export default Login;

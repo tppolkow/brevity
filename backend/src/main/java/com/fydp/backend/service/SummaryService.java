@@ -1,6 +1,7 @@
 package com.fydp.backend.service;
 
 import com.fydp.backend.model.Summary;
+import com.fydp.backend.model.User;
 import com.fydp.backend.repository.SummaryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,8 +14,8 @@ public class SummaryService implements ISummaryService {
     @Autowired
     private SummaryRepository repository;
 
-    public Long createSummary(String title){
-        Summary summary = new Summary(title, null, false);
+    public Long createSummary(String title, User user){
+        Summary summary = new Summary(title, null, false, user);
         repository.save(summary);
         return summary.getSummary_id();
     }

@@ -1,5 +1,8 @@
+html, body, #root, .App {
+  height: 100%;
+}
+
 body {
-  background-color: #eee;
   font-family: 'Source Sans Pro', sans-serif;
 }
 
@@ -10,7 +13,7 @@ body {
 }
 
 .footer {
-  margin-top: 60px;
+  margin-top: 40px;
   text-align: center;
   color: #888;
 }
