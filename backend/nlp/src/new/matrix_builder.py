@@ -6,16 +6,14 @@ from similarity import Similarity
 
 class MatrixBuilder:
     sentences = []
-    logging.basicConfig(format='%(asctime)s - %(message)s',
-                        datefmt='%d-%b-%y %H:%M:%S', level=logging.INFO)
 
-    def build_sim_matrix(self, sentence_list):
+    def build_sim_matrix(self, sentence_list, logger):
         sim = Similarity()
         self.sentences = sentence_list
         sim_matrix = np.empty([len(self.sentences), len(self.sentences)])
 
         for i in range(0, len(self.sentences)):
-            logging.info('Processing sentence # {} => {}'
+            logger.info('Processing sentence # {} => {}'
                          .format(i, self.sentences[i]))
             for j in range(i + 1, len(self.sentences)):
                 s1 = self.sentences[i]
