@@ -1,72 +1,60 @@
 import React from 'react';
-import { get } from 'axios';
-import { Row, Col, Card, Button } from 'react-bootstrap';
-import  { BASE_URLS, ACCESS_TOKEN } from './Constants';
+import { Card, Col, Row, Spinner } from 'react-bootstrap';
 import './SummaryViewer.css';
+import { brevityHttpGet, poll } from './Utilities';
 
-function poll(fn, timeout, interval) {
-    var endTime = Number(new Date()) + (timeout || 2000);
-    interval = interval || 100;
+const POLLING_TIMEOUT = 10 * 60 * 1000;
+const POLLING_INTERVAL = 1000;
 
-    var checkCondition = function(resolve, reject) {
-        var ajax = fn();
-        ajax.then( function(response){
-            if(response.status == 200) {
-                resolve(response.data);
-            }
-            else if (Number(new Date()) < endTime) {
-                setTimeout(checkCondition, interval, resolve, reject);
-            }
-            else {
-                reject(new Error('timed out for ' + fn + ': ' + arguments));
-            }
-        });
-    };
-
-    return new Promise(checkCondition);
-}
 class SummaryViewer extends React.Component {
   constructor(props) {
     super(props);
     this.props = props;
-    this.state = {
-      summaries: {},
-      fromChapterSelect: this.props.location.state.data.fromChapterSelect || false
-     };
+    this.state = { summaries: {} };
   }
 
   componentDidMount() {
-    const summaryIds = this.props.location.state.data.summaryIds;
+    const { summaryIds } = this.props.location.state.data;
     const summaries = {};
+
     Object.entries(summaryIds).forEach(([name, id]) => {
       summaries[name] = "";
-      let config = { headers: { Authorization: 'Bearer ' + localStorage.getItem(ACCESS_TOKEN) }}
-      poll(() => get(`${BASE_URLS.serverUrl}/summaries/${id}`, config), 10 * 60 * 1000, 1000)
-        .then(res => {
+      poll(() => brevityHttpGet(`/summaries/${id}`), POLLING_TIMEOUT, POLLING_INTERVAL)
+        .then((res) => {
           summaries[name] = res.data;
           this.setState({ summaries });
         })
-        .catch(err => {
-          console.log(`Could not fetch summary for ${name}`);
+        .catch((err) => {
+          summaries[name] = "Took too long to generate summary...Try refreshing the page or submitting a smaller job.";
+          this.setState({ summaries });
         });
     });
-    this.setState({ summaries })
+
+    this.setState({ summaries });
   }
 
   summaryItems(summaries) {
     return Object.entries(summaries).map(([name, summary], i) => {
       return (
-
         <Card key={i}>
-            <Card.Header>{name}</Card.Header>
-            <div class="summary">
-              <Card.Body>
-                {summary === "" ? "Generating summary..." : summary}
-              </Card.Body>
+            <Card.Header>
+              {name}
+              {
+                summary === "" &&
+                <div className="spinner-container">
+                  <Spinner animation="border" role="status" variant="primary" />
+                </div>
+              }
+            </Card.Header>
+            <div className="summary">
+              {
+                summary !== "" &&
+                <Card.Body>
+                  {summary}
+                </Card.Body>
+              }
             </div>
         </Card>
-        
-
       );
     });
   }
@@ -90,7 +78,6 @@ class SummaryViewer extends React.Component {
               <br/>
               When we're done, we'll put your {this.state.summaries.length === 1 ? "summary" : "summaries"} below.
             </p>
-            {this.state.fromChapterSelect && <Button>Go back to Chapter Select</Button>}
             {this.summaryItems(summaries)}
           </Col>
         </Row>

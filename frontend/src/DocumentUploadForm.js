@@ -1,10 +1,9 @@
 import React from 'react';
-import { Redirect } from 'react-router-dom';
-import { post, get } from 'axios';
-import { Row, Col, Spinner } from 'react-bootstrap';
+import { Col, Row, Spinner } from 'react-bootstrap';
 import Dropzone from 'react-dropzone';
-import { ACCESS_TOKEN, BASE_URLS } from './Constants'; 
+import { Redirect } from 'react-router-dom';
 import './DocumentUploadForm.css';
+import { brevityHttpGet, brevityHttpPost } from './Utilities';
 
 class DocumentUploadForm extends React.Component {
   constructor(props) {
@@ -28,23 +27,17 @@ class DocumentUploadForm extends React.Component {
     const formData = new FormData();
     formData.append("file", files[0]);
 
-    let config = { headers: { Authorization: 'Bearer ' + localStorage.getItem(ACCESS_TOKEN) }}
-    
-    post(BASE_URLS.serverUrl + '/upload', formData, config)
-      .then(res => {
-        if (res.data.pdfText !== '') {
-          this.setState({ goToSummary: true, data: { summaryIds: { Summary: res.data.summaryId }} });
-        } else {
-          this.setState({ goToChapterSelect: true, data: res.data });
-        }
-      });
+    brevityHttpPost('/upload', formData).then(res => {
+      if (res.data.pdfText !== '') {
+        this.setState({ goToSummary: true, data: { summaryIds: { [res.data.fileName]: res.data.summaryId }} });
+      } else {
+        this.setState({ goToChapterSelect: true, data: res.data });
+      }
+    });
   }
 
   componentDidMount() {
-    let config = { headers: { Authorization: 'Bearer ' + localStorage.getItem(ACCESS_TOKEN) }}
-    get(BASE_URLS.serverUrl + '/auth/user', config).then(res => {
-      this.setState({ userName: res.data }) 
-    })
+    brevityHttpGet('/auth/user').then(res => this.setState({ userName: res.data }));
   }
 
   render() {
@@ -59,7 +52,7 @@ class DocumentUploadForm extends React.Component {
               Start by uploading a PDF document below!
             </p>
             <h3>Upload a PDF</h3>
-            <Dropzone onDrop={this.handleDrop} disabled={this.state.uploading}>
+            <Dropzone onDrop={this.handleDrop} disabled={this.state.uploading} accept=".pdf">
               {({getRootProps, getInputProps}) => (
                 <section className="dnd-upload-container">
                   <div {...getRootProps()}>
@@ -71,7 +64,7 @@ class DocumentUploadForm extends React.Component {
                             <span className="sr-only">Loading...</span>
                           </Spinner>
                         </div> :
-                        <p>Drag 'n' drop some files here, or click to select files</p>
+                        <p>Drag 'n' drop a PDF here, or click to select one</p>
                     }
                   </div>
                 </section>

@@ -106,7 +106,7 @@ public class AppController {
 
         List<Summary> summaries = getUserFromBearerToken(bearerToken).getSummaries();
         List<Summary> sortedSummaries = summaries.stream()
-                .sorted(Comparator.comparing(Summary::getSummary_id))
+                .sorted(Comparator.comparing(Summary::getSummary_id, Comparator.reverseOrder()))
                 .collect(Collectors.toList());
         Map<String, String> ret = new HashMap<>();
 
@@ -154,7 +154,7 @@ public class AppController {
             pdfInfo.setPdfText(pdfText);
 
             //create the summary entry and get id of this summary
-            var summary_id = summaryService.createSummary("Summary", user);
+            var summary_id = summaryService.createSummary(file.getOriginalFilename(), user);
             pdfInfo.setSummaryId(summary_id);
 
             if (!pdfText.isEmpty()) {

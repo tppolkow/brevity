@@ -1,16 +1,17 @@
 import React from 'react';
+import { Button, Col, Form, Row } from 'react-bootstrap';
 import { Redirect } from 'react-router-dom';
-import { post } from 'axios';
-import { Button, Form, Row, Col } from 'react-bootstrap';
 import './ChapterSelectorList.css';
-import { BASE_URLS, ACCESS_TOKEN } from './Constants';
+import { brevityHttpPost } from './Utilities';
 
 class ChapterSelectorList extends React.Component {
   constructor(props) {
     super(props);
     this.props = props;
     this.state = {
-      goToSummary: false
+      goToSummary: false,
+      checkedCount: 0,
+      checkedChapters: {}
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -19,13 +20,16 @@ class ChapterSelectorList extends React.Component {
 
   handleInputChange(e) {
     const target = e.target;
-    this.setState({ [target.id]: target.checked });
+    const newCheckedCount = (target.checked) ? this.state.checkedCount + 1 : this.state.checkedCount - 1;
+    const newCheckedChapter = this.state.checkedChapters;
+    newCheckedChapter[target.id] = target.checked;
+    this.setState({ checkedChapters: newCheckedChapter, checkedCount: newCheckedCount });
   }
 
   handleSubmit(e) {
     e.preventDefault();
 
-    const selectedChapters = Object.entries(this.state)
+    const selectedChapters = Object.entries(this.state.checkedChapters)
       .reduce((selected, [chapId, checked]) => {
           if (checked) {
             const id = chapId.split('-')[1];
@@ -39,9 +43,7 @@ class ChapterSelectorList extends React.Component {
       chapters: selectedChapters
     };
 
-    let config = { headers: { Authorization: 'Bearer ' + localStorage.getItem(ACCESS_TOKEN) }}
-
-    post(BASE_URLS.serverUrl + "/upload/chapters", reqBody, config)
+    brevityHttpPost("/upload/chapters", reqBody)
       .then(res => this.setState({ goToSummary: true, data: { summaryIds: res.data, fromChapterSelect: true } }));
   }
 
@@ -77,7 +79,7 @@ class ChapterSelectorList extends React.Component {
             </p>
             <Form onSubmit={this.handleSubmit}>
               {this.chapterItems(chapters)}
-              <Button variant="primary" type="submit" className="submit-btn">Summarize</Button>
+              <Button variant="primary" type="submit" className="submit-btn" disabled={this.state.checkedCount === 0}>Summarize</Button>
             </Form>
           </Col>
         </Row>
