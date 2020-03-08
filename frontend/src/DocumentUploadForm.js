@@ -43,7 +43,7 @@ class DocumentUploadForm extends React.Component {
   componentDidMount() {
     let config = { headers: { Authorization: 'Bearer ' + localStorage.getItem(ACCESS_TOKEN) }}
     get(BASE_URLS.serverUrl + '/auth/user', config).then(res => {
-      this.setState({ userName: res.data }) 
+        localStorage.setItem('username', res.data);
     })
   }
 

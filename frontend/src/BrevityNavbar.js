@@ -5,6 +5,11 @@ import logo from './img/brevity_icon_dark.png';
 import './BrevityNavbar.css';
 
 class BrevityNavbar extends React.Component {
+
+  getUsername() {
+    return localStorage.getItem('username') !== null ? localStorage.getItem('username') : '';
+  }
+
   render() {
     return (
       <Navbar bg="dark" variant="dark" expand="lg">
@@ -28,7 +33,7 @@ class BrevityNavbar extends React.Component {
                 </Nav.Link>
           </Nav>
           <Navbar.Text>
-            Bob
+            Hello, { this.getUsername() }
           </Navbar.Text>
         </Navbar.Collapse>
       </Navbar>

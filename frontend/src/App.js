@@ -25,7 +25,7 @@ class App extends React.Component {
         <div className="App">
             <Switch>
               <Route exact path="/" component={Login} />
-              <div>
+              <React.Fragment>
                 <BrevityNavbar/>
                 <Container>
                   <PrivateRoute path="/upload" component={DocumentUploadForm} />
@@ -36,7 +36,7 @@ class App extends React.Component {
                     Copyright &copy; 2020 Brevity. All Rights Reserved.
                   </div>
                 </Container>
-              </div>
+              </React.Fragment>
             </Switch>
         </div>
       </Router>

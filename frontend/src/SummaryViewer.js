@@ -11,7 +11,7 @@ function poll(fn, timeout, interval) {
     var checkCondition = function(resolve, reject) {
         var ajax = fn();
         ajax.then( function(response){
-            if(response.status == 200) {
+            if(response.status === 200) {
                 resolve(response.data);
             }
             else if (Number(new Date()) < endTime) {
@@ -59,7 +59,7 @@ class SummaryViewer extends React.Component {
 
         <Card key={i}>
             <Card.Header>{name}</Card.Header>
-            <div class="summary">
+            <div className="summary">
               <Card.Body>
                 {summary === "" ? "Generating summary..." : summary}
               </Card.Body>
