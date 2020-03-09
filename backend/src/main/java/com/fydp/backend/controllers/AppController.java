@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -187,7 +186,7 @@ public class AppController {
             try {
                 PDFTextStripper reader = new PDFTextStripper();
                 reader.setStartPage(chapter.getStartPage());
-                reader.setEndPage(chapter.getEndPage() - 1);
+                reader.setEndPage(chapter.getStartPage() == chapter.getEndPage() ? chapter.getEndPage() : chapter.getEndPage() - 1);
 
                 var summary_id = summaryService.createSummary(chapter.getTitle(), user);
                 chapterIds.put(chapter.getTitle(), summary_id);

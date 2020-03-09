@@ -14,11 +14,6 @@ public class UserServiceImpl implements IUserService {
     private UserRepository userRepository;
 
     @Override
-    public Optional<User> findByEmail(String email) {
-        return userRepository.findById(email);
-    }
-
-    @Override
     public Optional<User> findById(String id) {
         return userRepository.findById(id);
     }
