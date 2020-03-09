@@ -12,10 +12,10 @@ import struct
 
 
 class Extractor:
-    
+
     @staticmethod
     def extract(raw_txt, logger):
-        
+
         c = Cleaner()
         cleaned_text_list = c.clean(raw_txt)
 
@@ -62,7 +62,9 @@ class Extractor:
 
         return result
 
+
 producer = KafkaProducer(bootstrap_servers='localhost:9092')
+
 
 class ConsumerThread(threading.Thread):
     def __init__(self, logger):
@@ -70,32 +72,33 @@ class ConsumerThread(threading.Thread):
         self.logger = logger
 
     def run(self):
-        consumer = KafkaConsumer('brevity_requests', group_id='nlp-consumers', bootstrap_servers=['localhost:9092'])
+        consumer = KafkaConsumer('brevity_requests', group_id='nlp-consumers',
+                                 bootstrap_servers=['localhost:9092'])
 
         ext = Extractor()
-     
+
         for message in consumer:
             # unpack the summary id, set > for big endian, Q for unsigned long
             (key,) = struct.unpack('>Q', message.key)
-        
+
             text_array = message.value.decode('utf-8')
             text = ''
             for character in text_array:
                 text += character
-        
+
             summary = ext.extract(raw_txt=text, logger=self.logger)
-        
+
             self.logger.info('Summary: \n{}'.format(summary))
-        
+
             producer.send('brevity_responses', str.encode(summary),
                           struct.pack('>Q', key))
-    
+
 
 for i in range(8):
     fname = '../log/nlp' + str(i) + '.log'
     handler = logging.FileHandler(fname)
     handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
-    logger = logging.getLogger("NLP"+str(i))
+    logger = logging.getLogger("NLP" + str(i))
     logger.setLevel(logging.INFO)
     logger.addHandler(handler)
 
