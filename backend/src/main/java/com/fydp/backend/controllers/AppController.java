@@ -49,6 +49,7 @@ public class AppController {
     private static final String END_OF_CHAPTER = "End of Last Chapter";
     private static final String CHAPTER_REGEX = "(\\bchapter|\\bch|\\bch\\.|\\bchap|\\bchap\\.|\\bpart|\\bsection|^)\\s*\\d+";
     private static final int MAX_SUMMARIES_TO_RETURN = 10;
+    private static final int MAX_FILE_SIZE_BYTES = 30 * 1024 * 1024;
 
     @Autowired
     private PdfInfo pdfInfo;
@@ -122,6 +123,11 @@ public class AppController {
     public PdfInfo upload(@RequestParam("file") MultipartFile file, @RequestHeader(value="Authorization") String bearerToken) throws IOException {
         logger.debug("Upload endpoint hit");
         User user = getUserFromBearerToken(bearerToken);
+
+        if (file.getSize() > MAX_FILE_SIZE_BYTES){
+            String errorMsg = String.format("Uploaded file size exceeds %d megabytes", MAX_FILE_SIZE_BYTES/(1024*1024));
+            throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE, errorMsg);
+        }
 
         PDDocument document = parsePDF(loadPdfFile(file));
         if (document == null) {
