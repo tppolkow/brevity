@@ -37,12 +37,14 @@ public class CustomOidcUserService extends OidcUserService {
     }
 
     private void saveUser(GoogleOAuth2UserInfo userInfo) {
-        Optional<User> optionalUser = userService.findByEmail(userInfo.getEmail());
-        User user = optionalUser.orElseGet(User::new);
-
-        user.setId(userInfo.getId());
-        user.setName(userInfo.getName());
-        user.setEmail(userInfo.getEmail());
-        userService.saveUser(user);
+        Optional<User> optionalUser = userService.findById(userInfo.getId());
+        User user;
+        if (!optionalUser.isPresent()) {
+            user = new User();
+            user.setId(userInfo.getId());
+            user.setName(userInfo.getName());
+            user.setEmail(userInfo.getEmail());
+            userService.saveUser(user);
+        }
     }
 }
