@@ -20,7 +20,7 @@ class PastSummaries extends React.Component {
       return (
         <Card key={i}>
             <Card.Header>{name}</Card.Header>
-            <div class="summary">
+            <div className="summary">
               <Card.Body>
                 {summary === "" ? "Generating summary..." : summary}
               </Card.Body>

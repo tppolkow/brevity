@@ -1,8 +1,10 @@
 import React from 'react';
 import { Nav, Navbar, NavDropdown } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import { ACCESS_TOKEN } from './Constants';
 import './BrevityNavbar.css';
 import logo from './img/brevity_icon_dark.png';
+
 
 class BrevityNavbar extends React.Component {
   constructor(props) {
@@ -12,8 +14,8 @@ class BrevityNavbar extends React.Component {
   }
 
   handleLogOut() {
-    if (localStorage.getItem('access_token') !== null) {
-        localStorage.removeItem('access_token')
+    if (localStorage.getItem(ACCESS_TOKEN) !== null) {
+        localStorage.removeItem(ACCESS_TOKEN)
     }
     window.location.href = "/"
   }

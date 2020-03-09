@@ -1,5 +1,5 @@
 import React from 'react';
-import { Col, Row, Spinner } from 'react-bootstrap';
+import { Col, Row, Spinner, Alert } from 'react-bootstrap';
 import Dropzone from 'react-dropzone';
 import { Redirect } from 'react-router-dom';
 import './DocumentUploadForm.css';
@@ -15,6 +15,7 @@ class DocumentUploadForm extends React.Component {
       data: {},
       uploading: false,
       userName: "",
+      error: false
     };
 
     this.handleDrop = this.handleDrop.bind(this);
@@ -33,16 +34,31 @@ class DocumentUploadForm extends React.Component {
       } else {
         this.setState({ goToChapterSelect: true, data: res.data });
       }
+    }).catch(error => {
+      console.log(error)
+      this.setState({
+          error: true,
+          uploading: false    
+      }) 
     });
   }
 
   componentDidMount() {
-    brevityHttpGet('/auth/user').then(res => localStorage.setItem('username', res.data));
+    let userName = localStorage.getItem('username');
+    if (userName === null) {
+      brevityHttpGet('/auth/user').then(res => localStorage.setItem('username', res.data));
+    }
   }
 
   render() {
     return (
       <div>
+        { this.state.error && 
+          <Alert variant="danger" onClose={() => { this.setState({ error: false })}} dismissible>
+            <Alert.Heading>Error</Alert.Heading>
+            <p>You have uploaded a file that is larger than 80MB, please try uploading something under that</p>
+          </Alert>
+        }
         <Row>
           <Col lg={{span: 8, offset: 2}}>
             <h1>Summarizer</h1>
@@ -51,7 +67,7 @@ class DocumentUploadForm extends React.Component {
               <br/>
               Start by uploading a PDF document below!
             </p>
-            <h3>Upload a PDF</h3>
+            <h3>Upload a PDF (Max file size: 80 MB)</h3>
             <Dropzone onDrop={this.handleDrop} disabled={this.state.uploading} accept=".pdf">
               {({getRootProps, getInputProps}) => (
                 <section className="dnd-upload-container">
