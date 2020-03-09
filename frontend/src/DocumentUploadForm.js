@@ -53,21 +53,23 @@ class DocumentUploadForm extends React.Component {
   render() {
     return (
       <div>
-        { this.state.error && 
-          <Alert variant="danger" onClose={() => { this.setState({ error: false })}} dismissible>
-            <Alert.Heading>Error</Alert.Heading>
-            <p>You have uploaded a file that is larger than 80MB, please try uploading something under that</p>
-          </Alert>
-        }
         <Row>
           <Col lg={{span: 8, offset: 2}}>
+            { this.state.error && 
+              <Alert variant="danger" onClose={() => { this.setState({ error: false })}} dismissible>
+                <Alert.Heading>Upload Failed</Alert.Heading>
+                <span>File is larger than 80 MB. Please try again with a smaller file.</span>
+              </Alert>
+            }
             <h1>Summarizer</h1>
             <p className="blurb">
               Brevity is a tool for generating summaries from textbook PDFs.
               <br/>
               Start by uploading a PDF document below!
             </p>
-            <h3>Upload a PDF (Max file size: 80 MB)</h3>
+            <h3>Upload a PDF 
+                <span className="file-size-span">(Maximum of 80MB)</span>
+            </h3>
             <Dropzone onDrop={this.handleDrop} disabled={this.state.uploading} accept=".pdf">
               {({getRootProps, getInputProps}) => (
                 <section className="dnd-upload-container">
