@@ -38,9 +38,8 @@ public class CustomOidcUserService extends OidcUserService {
 
     private void saveUser(GoogleOAuth2UserInfo userInfo) {
         Optional<User> optionalUser = userService.findById(userInfo.getId());
-        User user;
         if (!optionalUser.isPresent()) {
-            user = new User();
+            User user = new User();
             user.setId(userInfo.getId());
             user.setName(userInfo.getName());
             user.setEmail(userInfo.getEmail());
