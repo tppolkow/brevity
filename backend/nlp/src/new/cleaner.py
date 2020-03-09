@@ -25,14 +25,16 @@ class Cleaner:
 
         # Join any 1 word sentence with previous sentence
         for sentence in sentences:
-            if len(sentence.split()) == 1:
+            if len(sentence.split()) < 3:
                 index = sentences.index(sentence)
                 previous_sentence = sentences[index - 1]
                 if index < len(sentences) - 1:
                     next_sentence = sentences[index + 1]
-                sentences[index - 1] = '{}.{}.{}'.format(previous_sentence,
-                                                         sentence,
-                                                         next_sentence)
+                if not previous_sentence.isdigit() or not sentence.isdigit() or not next_sentence.isdigit():
+                    
+                    sentences[index - 1] = '{}.{}.{}'.format(previous_sentence,
+                                                             sentence,
+                                                             next_sentence)
                 sentences[index] = ''
                 if index < len(sentences) - 1:
                     sentences[index + 1] = ''
