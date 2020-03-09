@@ -9,14 +9,12 @@ import Login from './Login';
 import Oauth2RedirectHandler from './OauthRedirectHandler';
 import PastSummaries from './PastSummaries';
 import SummaryViewer from './SummaryViewer';
+import PrivateRoute from './PrivateRoute';
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.props = props;
-    this.state = {
-      username: 'Bob'
-    };
   }
 
   render() {
@@ -25,22 +23,19 @@ class App extends React.Component {
         <div className="App">
             <Switch>
               <Route exact path="/" component={Login} />
-              <div>
+              <React.Fragment>
                 <BrevityNavbar/>
                 <Container>
-                  <Route 
-                    path="/upload"  
-                    render={(props) => <DocumentUploadForm {...props} />}
-                  />
-                  <Route path="/chapter-select" component={ChapterSelectorList} />
-                  <Route path="/summary" component={SummaryViewer} />
-                  <Route path="/past-summaries" component={PastSummaries} />
+                  <PrivateRoute path="/upload" component={DocumentUploadForm} />
+                  <PrivateRoute path="/chapter-select" component={ChapterSelectorList} />
+                  <PrivateRoute path="/summary" component={SummaryViewer} />
+                  <PrivateRoute path="/past-summaries" component={PastSummaries} />
                   <Route path="/oauth2/redirect" component={Oauth2RedirectHandler} />
                   <div className="footer">
                     Copyright &copy; 2020 Brevity. All Rights Reserved.
                   </div>
                 </Container>
-              </div>
+              </React.Fragment>
             </Switch>
         </div>
       </Router>

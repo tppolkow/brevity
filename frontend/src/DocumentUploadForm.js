@@ -1,5 +1,5 @@
 import React from 'react';
-import { Col, Row, Spinner } from 'react-bootstrap';
+import { Col, Row, Spinner, Alert } from 'react-bootstrap';
 import Dropzone from 'react-dropzone';
 import { Redirect } from 'react-router-dom';
 import './DocumentUploadForm.css';
@@ -15,6 +15,7 @@ class DocumentUploadForm extends React.Component {
       data: {},
       uploading: false,
       userName: "",
+      error: false
     };
 
     this.handleDrop = this.handleDrop.bind(this);
@@ -33,11 +34,20 @@ class DocumentUploadForm extends React.Component {
       } else {
         this.setState({ goToChapterSelect: true, data: res.data });
       }
+    }).catch(error => {
+      console.log(error)
+      this.setState({
+          error: true,
+          uploading: false    
+      }) 
     });
   }
 
   componentDidMount() {
-    brevityHttpGet('/auth/user').then(res => this.setState({ userName: res.data }));
+    let userName = localStorage.getItem('username');
+    if (userName === null) {
+      brevityHttpGet('/auth/user').then(res => localStorage.setItem('username', res.data));
+    }
   }
 
   render() {
@@ -45,13 +55,21 @@ class DocumentUploadForm extends React.Component {
       <div>
         <Row>
           <Col lg={{span: 8, offset: 2}}>
+            { this.state.error && 
+              <Alert variant="danger" onClose={() => { this.setState({ error: false })}} dismissible>
+                <Alert.Heading>Upload Failed</Alert.Heading>
+                <span>File is larger than 80 MB. Please try again with a smaller file.</span>
+              </Alert>
+            }
             <h1>Summarizer</h1>
             <p className="blurb">
               Brevity is a tool for generating summaries from textbook PDFs.
               <br/>
               Start by uploading a PDF document below!
             </p>
-            <h3>Upload a PDF</h3>
+            <h3>Upload a PDF 
+                <span className="file-size-span">(Maximum of 80MB)</span>
+            </h3>
             <Dropzone onDrop={this.handleDrop} disabled={this.state.uploading} accept=".pdf">
               {({getRootProps, getInputProps}) => (
                 <section className="dnd-upload-container">
