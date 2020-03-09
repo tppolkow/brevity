@@ -8,6 +8,14 @@ class BrevityNavbar extends React.Component {
   constructor(props) {
     super(props);
     this.props = props;
+    this.handleLogOut = this.handleLogOut.bind(this);
+  }
+
+  handleLogOut() {
+    if (localStorage.getItem('access_token') !== null) {
+        localStorage.removeItem('access_token')
+    }
+    window.location.href = "/"
   }
 
   getUsername() {
@@ -38,7 +46,7 @@ class BrevityNavbar extends React.Component {
           </Nav>
           <NavDropdown alignRight title="Profile">
             <NavDropdown.Header>Signed in as { this.getUsername() }</NavDropdown.Header>
-            <NavDropdown.Item>Logout</NavDropdown.Item>
+            <NavDropdown.Item onClick={this.handleLogOut}>Logout</NavDropdown.Item>
           </NavDropdown>
         </Navbar.Collapse>
       </Navbar>

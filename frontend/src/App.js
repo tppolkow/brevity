@@ -6,23 +6,15 @@ import BrevityNavbar from './BrevityNavbar';
 import ChapterSelectorList from './ChapterSelectorList';
 import DocumentUploadForm from './DocumentUploadForm';
 import Login from './Login';
-<<<<<<< HEAD
-import PrivateRoute from './PrivateRoute';
-import './App.css';
-import BrevityNavbar from './BrevityNavbar';
-=======
 import Oauth2RedirectHandler from './OauthRedirectHandler';
 import PastSummaries from './PastSummaries';
 import SummaryViewer from './SummaryViewer';
->>>>>>> master
+import PrivateRoute from './PrivateRoute';
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.props = props;
-    this.state = {
-      username: 'Bob'
-    };
   }
 
   render() {
@@ -34,19 +26,10 @@ class App extends React.Component {
               <React.Fragment>
                 <BrevityNavbar/>
                 <Container>
-<<<<<<< HEAD
                   <PrivateRoute path="/upload" component={DocumentUploadForm} />
                   <PrivateRoute path="/chapter-select" component={ChapterSelectorList} />
                   <PrivateRoute path="/summary" component={SummaryViewer} />
-=======
-                  <Route 
-                    path="/upload"  
-                    render={(props) => <DocumentUploadForm {...props} />}
-                  />
-                  <Route path="/chapter-select" component={ChapterSelectorList} />
-                  <Route path="/summary" component={SummaryViewer} />
-                  <Route path="/past-summaries" component={PastSummaries} />
->>>>>>> master
+                  <PrivateRoute path="/past-summaries" component={PastSummaries} />
                   <Route path="/oauth2/redirect" component={Oauth2RedirectHandler} />
                   <div className="footer">
                     Copyright &copy; 2020 Brevity. All Rights Reserved.
