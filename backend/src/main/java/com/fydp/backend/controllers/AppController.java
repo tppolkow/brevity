@@ -49,7 +49,7 @@ public class AppController {
     private static final String END_OF_CHAPTER = "End of Last Chapter";
     private static final String CHAPTER_REGEX = "(\\bchapter|\\bch|\\bch\\.|\\bchap|\\bchap\\.|\\bpart|\\bsection|^)\\s*\\d+";
     private static final int MAX_SUMMARIES_TO_RETURN = 10;
-    private static final int MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024;
+    private static final int MAX_FILE_SIZE_BYTES = 80 * 1024 * 1024;
 
     @Autowired
     private PdfInfo pdfInfo;
