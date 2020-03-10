@@ -63,7 +63,7 @@ class Cleaner:
                 sentences[index] = ''
 
         undesirable = ['figure', 'table', 'fig', 'chapter', 'publisher', 'publishers', 
-        'ch', ">", "<", "+", "_" "eg", "page", "references", "key terms"]
+        'ch', ">", "<", "+", "_" "eg", "references", "key terms"]
         # Remove any sentence with figure/table/Fig/chapter/page type keywords
         for sent in sentences:
             index = sentences.index(sent)
