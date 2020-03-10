@@ -101,9 +101,11 @@ class ConsumerThread(threading.Thread):
             producer.send(prefix + 'brevity_responses', str.encode(summary),
                           struct.pack('>Q', key))
 
+if not os.path.exists('log'):
+    os.makedirs('log')
 
 for i in range(8):
-    fname = '../log/nlp' + str(i) + '.log'
+    fname = 'log/nlp' + str(i) + '.log'
     handler = logging.FileHandler(fname)
     handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
     logger = logging.getLogger("NLP" + str(i))

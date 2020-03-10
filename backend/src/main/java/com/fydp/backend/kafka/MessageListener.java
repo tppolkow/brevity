@@ -13,7 +13,7 @@ public class MessageListener {
     @Autowired
     private SummaryService summaryService;
 
-    @KafkaListener(topics = "brevity_responses", groupId = "${brevity.kafka.groupId}")
+    @KafkaListener(topics = "${brevity.kafka.response.topic}", groupId = "${brevity.kafka.groupId}")
     public void listen(ConsumerRecord<Long, String> record){
 
         logger.info("Received message : \n"  + record.key() + " : " + record.value());
