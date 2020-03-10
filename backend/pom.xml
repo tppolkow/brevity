@@ -99,9 +99,6 @@
 					<schemas>
 						<schema>brevity</schema>
 					</schemas>
-					<locations>
-						<location>filesystem:db</location>
-					</locations>
 				</configuration>
 			</plugin>
 		</plugins>
