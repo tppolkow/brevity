@@ -99,6 +99,7 @@
 					<schemas>
 						<schema>brevity</schema>
 					</schemas>
+					<baselineOnMigrate>true</baselineOnMigrate>
 				</configuration>
 			</plugin>
 		</plugins>
