@@ -38,6 +38,10 @@ log/
 # Upload Files #
 upload_files/
 
+#iml file
+backend/brevity_server.iml
+
+
 # Maven Files #
 target/
 .mvn/wrapper/maven-wrapper.jar
@@ -45,5 +49,14 @@ target/
 # IntelliJ #
 .idea/
 *.iml
+
 # Local Netlify folder
 .netlify
+
+backend/nlp/src/new/__pycache__/*
+
+# Java stuff
+.classpath
+*.project
+.settings
+

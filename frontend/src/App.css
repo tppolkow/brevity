@@ -1,8 +1,19 @@
-.App .container {
-  padding-top: 40px;
-  padding-bottom: 80px;
+html, body, #root, .App {
+  height: 100%;
 }
 
-.title {
-  margin-bottom: 20px;
+body {
+  font-family: 'Source Sans Pro', sans-serif;
+}
+
+.App .container {
+  padding-top: 36px;
+  padding-bottom: 40px;
+  background-color: #fff;
+}
+
+.footer {
+  margin-top: 40px;
+  text-align: center;
+  color: #888;
 }

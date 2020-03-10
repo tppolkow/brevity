@@ -21,12 +21,15 @@
 
 .chapter-selector-item .form-check-label {
     width: 100%;
-    padding-top: 10px;
+    padding-top: 8px;
     padding-left: 8px;
-    padding-bottom: 10px;
+    padding-bottom: 8px;
 }
 
 .chapter-selector-item:hover .form-check-label {
-    text-decoration: underline;
     cursor: pointer;
+}
+
+.submit-btn {
+    margin-top: 14px;
 }

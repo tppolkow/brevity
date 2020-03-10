@@ -26,14 +26,14 @@ public class KafkaProducerConfig {
     private String prefix;
 
     @Bean
-    public ProducerFactory<String, String> producerFactory() {
+    public ProducerFactory<Long, String> producerFactory() {
 //        Map<String, Object> configProps = new HashMap<>();
 //        configProps.put(
 //                ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
 //                bootstrapAddress);
 //        configProps.put(
 //                ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
-//                StringSerializer.class);
+//                LongSerializer.class);
 //        configProps.put(
 //                ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
 //                StringSerializer.class);
@@ -41,7 +41,7 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, String> kafkaTemplate() {
+    public KafkaTemplate<Long, String> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
 }

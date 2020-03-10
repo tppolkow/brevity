@@ -1,10 +1,13 @@
 package com.fydp.backend.controllers;
 
 import com.fydp.backend.kafka.KafkaProducer;
-import com.fydp.backend.kafka.MessageListener;
 import com.fydp.backend.model.Bookmark;
-import com.fydp.backend.model.ChapterTextModel;
 import com.fydp.backend.model.PdfInfo;
+import com.fydp.backend.model.Summary;
+import com.fydp.backend.model.User;
+import com.fydp.backend.security.TokenUtil;
+import com.fydp.backend.service.SummaryService;
+import com.fydp.backend.service.UserServiceImpl;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.interactive.action.PDActionGoTo;
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDNamedDestination;
@@ -15,9 +18,11 @@ import org.apache.pdfbox.text.PDFTextStripper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,6 +31,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Note: A lot of code are basically recreating the PDF document as well as variables that should only be
@@ -41,18 +47,23 @@ public class AppController {
     private static final String UPLOAD_PATH = System.getProperty("user.dir") + "/upload_files/";
     private static final String END_OF_CHAPTER = "End of Last Chapter";
     private static final String CHAPTER_REGEX = "(\\bchapter|\\bch|\\bch\\.|\\bchap|\\bchap\\.|\\bpart|\\bsection|^)\\s*\\d+";
+    private static final int MAX_SUMMARIES_TO_RETURN = 10;
+    private static final int MAX_FILE_SIZE_BYTES = 80 * 1024 * 1024;
 
     @Autowired
     private PdfInfo pdfInfo;
 
     @Autowired
-    private ChapterTextModel chapterTextModel;
-
-    @Autowired
-    private MessageListener listener;
-
-    @Autowired
     private KafkaProducer producer;
+
+    @Autowired
+    private SummaryService summaryService;
+
+    @Autowired
+    private UserServiceImpl userService;
+
+    @Autowired
+    private TokenUtil tokenUtil;
 
     @RequestMapping("/")
     public String welcome() {
@@ -60,23 +71,62 @@ public class AppController {
         return "index";
     }
 
-    @GetMapping(value = ("/summaries"))
-    public Map<String, String> getSummaries() {
-        logger.info("GET summary endpoint hit");
-
-        try {
-            listener.getLatch().await();
-        } catch (InterruptedException e) {
-            logger.error("Error while waiting for kafka response : " + e.getMessage());
-            e.printStackTrace();
-        }
-
-        return listener.getMessages();
+    @GetMapping(value="/auth/user")
+    public String getAuthenticatedUser(@RequestHeader(value="Authorization") String bearerToken) {
+        logger.info("Getting authenticated username");
+        return getUserFromBearerToken(bearerToken).getName();
     }
 
+    @GetMapping(value = ("/summaries/{id}"))
+    public Map<String, String> getSummaries(@PathVariable String id, @RequestHeader(value="Authorization") String bearerToken) throws InterruptedException {
+        logger.info("GET summary endpoint hit");
+
+        Long summary_id = Long.parseLong(id);
+        Map<String, String> ret = new HashMap<>();
+
+        var summary = summaryService.findById(summary_id);
+        if (summary.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No summary job for this id");
+        }
+
+        var summ = summary.get();
+        if (summ.isFinished()){
+            ret.put("title", summ.getTitle());
+            ret.put("data", summ.getData());
+        }
+
+        if (ret.isEmpty()) throw new ResponseStatusException(HttpStatus.ACCEPTED, "Summary still processing");
+
+        return ret;
+    }
+
+    @GetMapping(value = ("/summaries/user"))
+    public Map<String, String> getUserSummaries(@RequestHeader(value="Authorization") String bearerToken){
+        logger.info("/summaries/user hit");
+
+        List<Summary> summaries = getUserFromBearerToken(bearerToken).getSummaries();
+        List<Summary> sortedSummaries = summaries.stream()
+                .sorted(Comparator.comparing(Summary::getSummary_id, Comparator.reverseOrder()))
+                .collect(Collectors.toList());
+        Map<String, String> ret = new HashMap<>();
+
+        for (var summary : sortedSummaries){
+            if (summary.isFinished()) ret.put(summary.getTitle(), summary.getData());
+            if (ret.size() >= MAX_SUMMARIES_TO_RETURN) break;
+        }
+        return ret;
+    }
+
+    // returns pdfInfo which contains the summaryId to hit /summaries/{id}
     @PostMapping(value = ("/upload"), headers = ("content-type=multipart/*"))
-    public PdfInfo upload(@RequestParam("file") MultipartFile file) throws IOException {
+    public PdfInfo upload(@RequestParam("file") MultipartFile file, @RequestHeader(value="Authorization") String bearerToken) throws IOException {
         logger.debug("Upload endpoint hit");
+        User user = getUserFromBearerToken(bearerToken);
+
+        if (file.getSize() > MAX_FILE_SIZE_BYTES){
+            String errorMsg = String.format("Uploaded file size exceeds %d megabytes", MAX_FILE_SIZE_BYTES/(1024*1024));
+            throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE, errorMsg);
+        }
 
         PDDocument document = parsePDF(loadPdfFile(file));
         if (document == null) {
@@ -97,13 +147,24 @@ public class AppController {
 
             pdfInfo.setChapters(chapters);
             pdfInfo.setPdfText("");
+            // summary id of 0 means no summary job submitted yet
+            pdfInfo.setSummaryId(0L);
         } else {
             logger.info("No bookmarks found in PDF. Summarizing entire document.");
+
+            // Clear chapters at it may still be set from previous calls to this endpoint
+            pdfInfo.setChapters(null);
+
             String pdfText = new PDFTextStripper().getText(document);
             pdfInfo.setPdfText(pdfText);
+
+            //create the summary entry and get id of this summary
+            var summary_id = summaryService.createSummary(file.getOriginalFilename(), user);
+            pdfInfo.setSummaryId(summary_id);
+
             if (!pdfText.isEmpty()) {
-                producer.sendMessage(pdfText);
-                listener.setMessages(1);
+                //send text with associated summary id to kafka
+                producer.sendMessageWithKey(pdfText, summary_id);
             }
         }
 
@@ -113,30 +174,33 @@ public class AppController {
         return pdfInfo;
     }
 
+    //@return: returns map of chapter titles to summary_ids
+    // can use these summary ids to hit the /summaries/{id} endpoint to retrieve summary for that chapter
     @PostMapping(value = "/upload/chapters", consumes = {MediaType.APPLICATION_JSON_VALUE})
-    public ChapterTextModel parseChapters(@RequestBody PdfInfo response) throws IOException {
+    public Map<String,Long> parseChapters(@RequestBody PdfInfo response, @RequestHeader(value="Authorization") String bearerToken) throws IOException {
+        User user = getUserFromBearerToken(bearerToken);
         List<Bookmark> chapters = response.getChapters();
-        Map<String, String> chapterTxt = new HashMap<>();
+        Map<String, Long> chapterIds = new HashMap<>();
         PDDocument document = parsePDF(new File(UPLOAD_PATH + response.getFileName()));
         for (var chapter : chapters) {
             try {
                 PDFTextStripper reader = new PDFTextStripper();
                 reader.setStartPage(chapter.getStartPage());
-                reader.setEndPage(chapter.getEndPage() - 1);
-                chapterTxt.put(chapter.getTitle(), reader.getText(document));
+                reader.setEndPage(chapter.getStartPage() == chapter.getEndPage() ? chapter.getEndPage() : chapter.getEndPage() - 1);
+
+                var summary_id = summaryService.createSummary(chapter.getTitle(), user);
+                chapterIds.put(chapter.getTitle(), summary_id);
+                String rawText = reader.getText(document);
+                if (!rawText.isEmpty()) {
+                    producer.sendMessageWithKey(rawText, summary_id);
+                }
             } catch (IOException ex) {
                 logger.error("Unable to create text stripper", ex);
             }
         }
 
-        chapterTextModel.setChpTextMap(chapterTxt);
-        for (var entry : chapterTxt.entrySet()) {
-            producer.sendMessageWithKey(entry.getValue().toString(), entry.getKey().toString());
-        }
-        listener.setMessages(chapterTxt.size());
-
         document.close();
-        return chapterTextModel;
+        return chapterIds;
     }
 
     private File loadPdfFile(MultipartFile file) {
@@ -294,7 +358,7 @@ public class AppController {
      */
     private List<Bookmark> findChapters(List<Bookmark> bookmarks, String chapterRegex) {
         var chapters = new ArrayList<Bookmark>();
-        var pattern = Pattern.compile(chapterRegex);
+        var pattern = Pattern.compile(chapterRegex, Pattern.CASE_INSENSITIVE);
         for (var b : bookmarks) {
             var match = pattern.matcher(b.getTitle());
             if (match.find()) {
@@ -302,6 +366,23 @@ public class AppController {
             }
         }
         return chapters;
+    }
+
+    private User getUserFromBearerToken(String bearerToken){
+        String jwt = tokenUtil.getJwtfromRequest(bearerToken);
+        if (jwt != null) {
+            String id = tokenUtil.getIdFromToken(jwt);
+            Optional<User> optionalUser = userService.findById(id);
+            User user;
+            if (optionalUser.isPresent()) {
+                user = optionalUser.get();
+                return user;
+            } else {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User is not found");
+            }
+        } else {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied, request does not contain required token");
+        }
     }
 
 }

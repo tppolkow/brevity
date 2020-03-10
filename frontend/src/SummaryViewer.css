@@ -1,0 +1,22 @@
+.summary {
+	white-space:pre-wrap;
+}
+
+.blurb {
+    margin-bottom: 14px;
+}
+
+.card {
+    margin-top: 20px;
+}
+
+.card-header {
+    font-weight: bold;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+}
+
+.card-header .spinner-border {
+    margin-left: 18px;
+}

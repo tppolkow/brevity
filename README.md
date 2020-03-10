@@ -32,7 +32,12 @@ Sample commands to set up on ubuntu:
 
 `sudo su - postgres` starts up postgres
 
-For the first time you run, you will have to set the password to be postgres. To do this, after running the above command do the following:
-`psql`
-`\password postgres`
-enter new password ( for now just type `postgres` ) 
+For the first time you run, you will have to set the password to be postgres. To do this, after running the above command run the following:
+1. `psql`
+2. `\password postgres`
+3. Enter new password ( for now just type `postgres` )
+
+Also, you will need to setup the brevity database for first-time so run the following command in the same `psql` session
+```
+CREATE DATABASE brevity
+```

@@ -1,0 +1,42 @@
+.blurb {
+    margin-bottom: 28px;
+}
+
+.dnd-upload-container {
+    margin-top: 20px;
+    text-align: center;
+    background-color: #e0effc;
+    border-radius: 2px;
+    border: 1px dashed #1675c6;
+    height: 120px;
+}
+
+.dnd-upload-container > div {
+    height: 100%;
+}
+
+.dnd-upload-container p {
+    margin: 0;
+    height: 120px;
+    line-height: 120px;
+    cursor: pointer;
+    color: #187fd8;
+}
+
+.dnd-upload-container .spinner-container {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.file-size-span {
+    font-size: 16px;
+    color: #666;
+    margin-left: 6px;
+}
+
+.alert-heading {
+    font-size: 16px;
+    font-weight: bold;
+}

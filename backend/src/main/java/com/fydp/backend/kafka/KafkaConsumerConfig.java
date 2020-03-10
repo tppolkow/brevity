@@ -28,17 +28,17 @@ public class KafkaConsumerConfig {
     private String prefix;
 
     @Bean
-    public ConsumerFactory<String, String> consumerFactory() {
+    public ConsumerFactory<Long, String> consumerFactory() {
 //        Map<String, Object> props = new HashMap<>();
 //        props.put(
 //                ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
 //                bootstrapAddress);
 //        props.put(
 //                ConsumerConfig.GROUP_ID_CONFIG,
-//                KafkaConfig.groupId);
+//                groupId);
 //        props.put(
 //                ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
-//                StringDeserializer.class);
+//                LongDeserializer.class);
 //        props.put(
 //                ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
 //                StringDeserializer.class);
@@ -46,12 +46,12 @@ public class KafkaConsumerConfig {
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, String>
-    kafkaListenerContainerFactory() {
+    public ConcurrentKafkaListenerContainerFactory<Long, String> kafkaListenerContainerFactory() {
 
-        ConcurrentKafkaListenerContainerFactory<String, String> factory
+        ConcurrentKafkaListenerContainerFactory<Long, String> factory
                 = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
+
         return factory;
     }
 

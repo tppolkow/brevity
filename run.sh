@@ -15,7 +15,7 @@ $KAFKA_DIR/bin/kafka-server-start.sh $KAFKA_DIR/config/server.properties > ./log
 #start backend
 cd backend/
 echo "running migrations..."
-./mvnw clean flyway:migrate -Dflyway.configFile=myFlywayConfig.properties
+./mvnw clean flyway:migrate -Dflyway.configFiles=myFlywayConfig.properties
 
 echo "build and start backend..."
 ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8081" -Dspring-boot.run.profiles=dev > ../log/backend.log &
@@ -24,7 +24,7 @@ sleep 2
 # start nlp workers
 echo "starting nlp..."
 pip3 install -r requirements.txt -U
-python3 nlp/src/new/extractor.py > ../log/nlp.log &
+python3 nlp/src/new/extractor.py &
 
 # sleep for 10s while backend starts .... 
 # volatile - if stuff is failing on your machine maybe increase sleep time

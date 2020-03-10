@@ -1,7 +1,9 @@
 import React from 'react';
+import { Col, Row, Spinner, Alert } from 'react-bootstrap';
+import Dropzone from 'react-dropzone';
 import { Redirect } from 'react-router-dom';
-import { post } from 'axios';
-import { Button, Form } from 'react-bootstrap';
+import './DocumentUploadForm.css';
+import { brevityHttpGet, brevityHttpPost } from './Utilities';
 
 class DocumentUploadForm extends React.Component {
   constructor(props) {
@@ -10,39 +12,84 @@ class DocumentUploadForm extends React.Component {
     this.state = {
       goToChapterSelect: false,
       goToSummary: false,
-      data: {}
+      data: {},
+      uploading: false,
+      userName: "",
+      error: false
     };
 
-    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleDrop = this.handleDrop.bind(this);
     this.fileInput = React.createRef();
   }
 
-  handleSubmit(e) {
-    e.preventDefault();
+  handleDrop(files) {
+    this.setState({ uploading: true });
 
     const formData = new FormData();
-    formData.append("file", this.fileInput.current.files[0]);
+    formData.append("file", files[0]);
 
-    post(this.props.endpoint, formData)
-      .then(res => {
-        if (res.data.pdfText !== '') {
-          this.setState({ goToSummary: true });
-        } else {
-          this.setState({ goToChapterSelect: true, data: res.data });
-        }
-      });
+    brevityHttpPost('/upload', formData).then(res => {
+      if (res.data.pdfText !== '') {
+        this.setState({ goToSummary: true, data: { summaryIds: { [res.data.fileName]: res.data.summaryId }} });
+      } else {
+        this.setState({ goToChapterSelect: true, data: res.data });
+      }
+    }).catch(error => {
+      console.log(error)
+      this.setState({
+          error: true,
+          uploading: false    
+      }) 
+    });
+  }
+
+  componentDidMount() {
+    let userName = localStorage.getItem('username');
+    if (userName === null) {
+      brevityHttpGet('/auth/user').then(res => localStorage.setItem('username', res.data));
+    }
   }
 
   render() {
     return (
       <div>
-        <Form className="upload-form" onSubmit={this.handleSubmit} encType="multipart/form-data">
-          <Form.Group controlId="uploadFile">
-            <h4><Form.Label>Upload PDF</Form.Label></h4>
-            <Form.Control type="file" ref={this.fileInput} name="file" />
-          </Form.Group>
-          <Button variant="primary" type="submit">Upload</Button>
-        </Form>
+        <Row>
+          <Col lg={{span: 8, offset: 2}}>
+            { this.state.error && 
+              <Alert variant="danger" onClose={() => { this.setState({ error: false })}} dismissible>
+                <Alert.Heading>Upload Failed</Alert.Heading>
+                <span>File is larger than 80 MB. Please try again with a smaller file.</span>
+              </Alert>
+            }
+            <h1>Summarizer</h1>
+            <p className="blurb">
+              Brevity is a tool for generating summaries from textbook PDFs.
+              <br/>
+              Start by uploading a PDF document below!
+            </p>
+            <h3>Upload a PDF 
+                <span className="file-size-span">(Maximum of 80MB)</span>
+            </h3>
+            <Dropzone onDrop={this.handleDrop} disabled={this.state.uploading} accept=".pdf">
+              {({getRootProps, getInputProps}) => (
+                <section className="dnd-upload-container">
+                  <div {...getRootProps()}>
+                    <input {...getInputProps()} />
+                    {
+                      this.state.uploading ?
+                        <div className="spinner-container">
+                          <Spinner animation="border" role="status" variant="primary">
+                            <span className="sr-only">Loading...</span>
+                          </Spinner>
+                        </div> :
+                        <p>Drag 'n' drop a PDF here, or click to select one</p>
+                    }
+                  </div>
+                </section>
+              )}
+            </Dropzone>
+          </Col>
+        </Row>
         {this.state.goToChapterSelect && <Redirect to={{ pathname: "/chapter-select", state: { data: this.state.data } }} />}
         {this.state.goToSummary && <Redirect to={{ pathname: "/summary", state: { data: this.state.data } }} />}
       </div>

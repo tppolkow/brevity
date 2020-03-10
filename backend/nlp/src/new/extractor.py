@@ -1,49 +1,16 @@
 import os
 import kafka_helper
+import threading
+import logging
+import struct
 
 from heapq import nlargest
 from cleaner import Cleaner
 from grapher import Grapher
 from matrix_builder import MatrixBuilder
+from cluster import Cluster
 from kafka import KafkaConsumer
 from kafka import KafkaProducer
-
-class Extractor:
-    @staticmethod
-    def extract(raw_txt):
-        c = Cleaner()
-        cleaned_text_list = c.clean(raw_txt)
-
-        print(len(cleaned_text_list))
-        print('Done cleaning')
-        # print(cleaned_text_list)
-
-        m = MatrixBuilder()
-        matrix = m.build_sim_matrix(cleaned_text_list)
-        # print(matrix)
-        # print('Dimensions: {}'.format(matrix.shape))
-
-        print('Done building sim matrix')
-
-        g = Grapher()
-        pageranks = g.graph(matrix)
-        # print(m.sentences)
-        # print(pageranks)
-
-        print('Generated graph and got pageranks')
-
-        summary_length = int(0.2 * len(cleaned_text_list))
-        top_ranked = nlargest(summary_length, pageranks, key=pageranks.get)
-        top_ranked.sort()
-        # print(result)
-
-        result = ''
-        for key in top_ranked:
-            top_ranked_sentence = m.sentences[key]
-            # print('.{}.'.format(top_ranked_sentence))
-            result += '{}. '.format(top_ranked_sentence)
-
-        return result
 
 prefix = os.getenv('KAFKA_PREFIX', '')
 servers = kafka_helper.get_kafka_brokers()
@@ -53,25 +20,94 @@ producer = KafkaProducer(
     security_protocol = 'SSL', 
     ssl_context = certs
 )
-consumer = KafkaConsumer(
-    prefix + 'brevity_request', 
-    bootstrap_servers = servers, 
-    group_id = prefix + 'brevity_consumer',
-    security_protocol = 'SSL', 
-    ssl_context = certs
-)
 
-ext = Extractor()
+class Extractor:
 
-for message in consumer:
-    key = str(message.key)
-    text_array = message.value.decode('utf-8')
-    text = ''
-    for character in text_array:
-        text += character
+    @staticmethod
+    def extract(raw_txt, logger):
 
-    summary = ext.extract(raw_txt=text)
+        c = Cleaner()
+        cleaned_text_list = c.clean(raw_txt)
 
-    print(summary)
+        logger.info('Done cleaning')
+        logger.debug(len(cleaned_text_list))
+        logger.debug(cleaned_text_list)
 
-    producer.send(prefix + 'brevity_responses', str.encode(summary), key=key.encode())
+        matrix_builder = MatrixBuilder()
+        matrix = matrix_builder.build_sim_matrix(cleaned_text_list, logger)
+
+        logger.info('Done building sim matrix')
+        logger.debug('Dimensions: {}'.format(matrix.shape))
+        logger.debug(matrix)
+
+        g = Grapher()
+        pageranks = g.graph(matrix)
+
+        logger.info('Generated graph and got pageranks')
+        logger.debug(pageranks)
+
+        total_doc_size = len(cleaned_text_list)
+        if total_doc_size in range(0, 300):
+            summary_length = int(0.4 * total_doc_size)
+        elif total_doc_size in range(301, 800):
+            summary_length = int(0.2 * total_doc_size)
+        elif total_doc_size in range(801, 1500):
+            summary_length = int(0.1 * total_doc_size)
+        else:
+            summary_length = int(0.05 * total_doc_size)
+
+        top_ranked = nlargest(summary_length, pageranks, key=pageranks.get)
+        top_ranked.sort()
+
+        cl = Cluster()
+        top_ranked = cl.splitIntoParagraph(top_ranked, 10)
+
+        logger.debug(top_ranked)
+        result = ''
+        for paragraph in top_ranked:
+            for key in paragraph:
+                top_ranked_sentence = cleaned_text_list[key]
+                result += '{}. '.format(top_ranked_sentence)
+            result += '\n\n'
+
+        return result
+
+class ConsumerThread(threading.Thread):
+    def __init__(self, logger):
+        super(ConsumerThread, self).__init__()
+        self.logger = logger
+
+    def run(self):
+        consumer = consumer = KafkaConsumer(prefix + 'brevity_requests', bootstrap_servers = servers,  
+                                    group_id = prefix + 'nlp-consumers', security_protocol = 'SSL', 
+                                    ssl_context = certs
+                                )
+
+        ext = Extractor()
+
+        for message in consumer:
+            # unpack the summary id, set > for big endian, Q for unsigned long
+            (key,) = struct.unpack('>Q', message.key)
+
+            text_array = message.value.decode('utf-8')
+            text = ''
+            for character in text_array:
+                text += character
+
+            summary = ext.extract(raw_txt=text, logger=self.logger)
+
+            self.logger.info('Summary: \n{}'.format(summary))
+
+            producer.send(prefix + 'brevity_responses', str.encode(summary),
+                          struct.pack('>Q', key))
+
+
+for i in range(8):
+    fname = '../log/nlp' + str(i) + '.log'
+    handler = logging.FileHandler(fname)
+    handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
+    logger = logging.getLogger("NLP" + str(i))
+    logger.setLevel(logging.INFO)
+    logger.addHandler(handler)
+
+    ConsumerThread(logger).start()
