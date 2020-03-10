@@ -93,6 +93,9 @@
 				<artifactId>flyway-maven-plugin</artifactId>
 				<configuration>
 					<url>${env.JDBC_DATABASE_URL}</url>
+					<schemas>
+						<schema>brevity</schema>
+					</schemas>
 				</configuration>
 			</plugin>
 		</plugins>
