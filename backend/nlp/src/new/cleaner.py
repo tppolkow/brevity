@@ -62,12 +62,16 @@ class Cleaner:
                 index = sentences.index(sentence)
                 sentences[index] = ''
 
-        # Remove any sentence with figure/table/Fig keywords
+        undesirable = ['figure', 'table', 'fig', 'chapter', 'publisher', 'publishers', 
+        'ch', ">", "<", "+", "_" "eg", "page", "references", "key terms"]
+        # Remove any sentence with figure/table/Fig/chapter/page type keywords
         for sent in sentences:
             index = sentences.index(sent)
             sent = sent.lower()
-            if 'figure' in sent or 'table' in sent or 'fig' in sent:
-                sentences[index] = ''
+            for u in undesirable:
+                if u in sent:
+                    sentences[index] = ''
+                    break
 
         # Replace all sentences that have random spacing with empty
         # Example: Psychology 43 c o n c e p t c h e c k 2.
@@ -85,6 +89,13 @@ class Cleaner:
         for sentence in sentences:
             is_match = re.match(r'^([A-Z])', sentence)
             if not is_match:
+                index = sentences.index(sentence)
+                sentences[index] = ''
+
+        # Replace all sentences that have a time
+        for sentence in sentences:
+            is_match = re.match(r'(2[0-3]|[01][0-9]):[0-5][0-9]', sentence)
+            if is_match:
                 index = sentences.index(sentence)
                 sentences[index] = ''
 
