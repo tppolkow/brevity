@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -49,6 +48,7 @@ public class AppController {
     private static final String END_OF_CHAPTER = "End of Last Chapter";
     private static final String CHAPTER_REGEX = "(\\bchapter|\\bch|\\bch\\.|\\bchap|\\bchap\\.|\\bpart|\\bsection|^)\\s*\\d+";
     private static final int MAX_SUMMARIES_TO_RETURN = 10;
+    private static final int MAX_FILE_SIZE_BYTES = 80 * 1024 * 1024;
 
     @Autowired
     private PdfInfo pdfInfo;
@@ -123,6 +123,11 @@ public class AppController {
         logger.debug("Upload endpoint hit");
         User user = getUserFromBearerToken(bearerToken);
 
+        if (file.getSize() > MAX_FILE_SIZE_BYTES){
+            String errorMsg = String.format("Uploaded file size exceeds %d megabytes", MAX_FILE_SIZE_BYTES/(1024*1024));
+            throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE, errorMsg);
+        }
+
         PDDocument document = parsePDF(loadPdfFile(file));
         if (document == null) {
             logger.error("Not able to load PDF");
@@ -181,7 +186,7 @@ public class AppController {
             try {
                 PDFTextStripper reader = new PDFTextStripper();
                 reader.setStartPage(chapter.getStartPage());
-                reader.setEndPage(chapter.getEndPage() - 1);
+                reader.setEndPage(chapter.getStartPage() == chapter.getEndPage() ? chapter.getEndPage() : chapter.getEndPage() - 1);
 
                 var summary_id = summaryService.createSummary(chapter.getTitle(), user);
                 chapterIds.put(chapter.getTitle(), summary_id);

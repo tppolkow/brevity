@@ -1,14 +1,27 @@
 import React from 'react';
 import { Nav, Navbar, NavDropdown } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import { ACCESS_TOKEN } from './Constants';
 import './BrevityNavbar.css';
 import logo from './img/brevity_icon_dark.png';
+
 
 class BrevityNavbar extends React.Component {
   constructor(props) {
     super(props);
     this.props = props;
-    this.state = { username: "Bob" };
+    this.handleLogOut = this.handleLogOut.bind(this);
+  }
+
+  handleLogOut() {
+    if (localStorage.getItem(ACCESS_TOKEN) !== null) {
+        localStorage.removeItem(ACCESS_TOKEN)
+    }
+    window.location.href = "/"
+  }
+
+  getUsername() {
+    return localStorage.getItem('username') !== null ? localStorage.getItem('username') : '';
   }
 
   render() {
@@ -34,8 +47,8 @@ class BrevityNavbar extends React.Component {
             </Nav.Link>
           </Nav>
           <NavDropdown alignRight title="Profile">
-            <NavDropdown.Header>Signed in as {this.state.username}</NavDropdown.Header>
-            <NavDropdown.Item>Logout</NavDropdown.Item>
+            <NavDropdown.Header>Signed in as { this.getUsername() }</NavDropdown.Header>
+            <NavDropdown.Item onClick={this.handleLogOut}>Logout</NavDropdown.Item>
           </NavDropdown>
         </Navbar.Collapse>
       </Navbar>

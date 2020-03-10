@@ -29,3 +29,14 @@
     justify-content: center;
     align-items: center;
 }
+
+.file-size-span {
+    font-size: 16px;
+    color: #666;
+    margin-left: 6px;
+}
+
+.alert-heading {
+    font-size: 16px;
+    font-weight: bold;
+}
