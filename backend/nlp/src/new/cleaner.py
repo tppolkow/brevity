@@ -16,13 +16,13 @@ class Cleaner:
 
         # Split text into sentences
         sentences = text.split('.')
-
+        
         # Remove any space at the beginning or end of sentence
         for sentence in sentences:
             index = sentences.index(sentence)
             new_sentence = sentence.strip()
             sentences[index] = new_sentence
-
+            
         # Join any 1 word sentence with previous sentence
         for sentence in sentences:
             if len(sentence.split()) < 3:
@@ -30,15 +30,14 @@ class Cleaner:
                 previous_sentence = sentences[index - 1]
                 if index < len(sentences) - 1:
                     next_sentence = sentences[index + 1]
-                if not previous_sentence.isdigit() or not sentence.isdigit() or not next_sentence.isdigit():
-                    
+                if not previous_sentence.isdigit() and not sentence.isdigit() and not next_sentence.isdigit():
+                
                     sentences[index - 1] = '{}.{}.{}'.format(previous_sentence,
                                                              sentence,
                                                              next_sentence)
                 sentences[index] = ''
                 if index < len(sentences) - 1:
                     sentences[index + 1] = ''
-
         # Replace any sentence that have less than 5 words with empty
         min_number_of_words = 5
         for sentence in sentences:
@@ -110,7 +109,6 @@ class Cleaner:
         
         # Drop any empty sentences
         sentences = list(filter(None, sentences))
-
         return sentences
 
     def clean_file(self, input_file):
