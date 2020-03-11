@@ -3,7 +3,7 @@ import { Col, Row, Spinner, Alert } from 'react-bootstrap';
 import Dropzone from 'react-dropzone';
 import { Redirect } from 'react-router-dom';
 import './DocumentUploadForm.css';
-import { brevityHttpGet, brevityHttpPost } from './Utilities';
+import { brevityHttpPost } from './Utilities';
 
 class DocumentUploadForm extends React.Component {
   constructor(props) {
@@ -41,13 +41,6 @@ class DocumentUploadForm extends React.Component {
           uploading: false    
       }) 
     });
-  }
-
-  componentDidMount() {
-    let userName = localStorage.getItem('username');
-    if (userName === null) {
-      brevityHttpGet('/auth/user').then(res => localStorage.setItem('username', res.data));
-    }
   }
 
   render() {
