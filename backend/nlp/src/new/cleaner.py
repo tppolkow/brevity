@@ -30,8 +30,8 @@ class Cleaner:
                 previous_sentence = sentences[index - 1]
                 if index < len(sentences) - 1:
                     next_sentence = sentences[index + 1]
-                if not previous_sentence.isdigit() and not sentence.isdigit() and not next_sentence.isdigit():
-                
+                if not previous_sentence.isdigit() and not sentence.isdigit() \
+                        and not next_sentence.isdigit():
                     sentences[index - 1] = '{}.{}.{}'.format(previous_sentence,
                                                              sentence,
                                                              next_sentence)
@@ -61,8 +61,9 @@ class Cleaner:
                 index = sentences.index(sentence)
                 sentences[index] = ''
 
-        undesirable = ['figure', 'table', 'fig', 'chapter', 'publisher', 'publishers', 
-        'ch', ">", "<", "+", "_" "eg", "references", "key terms"]
+        undesirable = ['figure', 'table', 'fig', 'chapter', 'publisher',
+                       'publishers', 'ch', '>', '<', '+', '_' 'eg',
+                       'references', 'key terms']
         # Remove any sentence with figure/table/Fig/chapter/page type keywords
         for sent in sentences:
             index = sentences.index(sent)
