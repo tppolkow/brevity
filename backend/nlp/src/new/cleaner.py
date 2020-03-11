@@ -93,7 +93,7 @@ class Cleaner:
 
         # Replace all sentences that have a time
         for sentence in sentences:
-            is_match = re.match(r'([0-9]+):[0-5][0-9]', sentence)
+            is_match = re.match(r'([0-9]+)(:|-)[0-5][0-9]', sentence)
             if is_match:
                 index = sentences.index(sentence)
                 sentences[index] = ''
