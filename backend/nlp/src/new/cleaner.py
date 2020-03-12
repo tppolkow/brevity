@@ -1,8 +1,9 @@
 import re
-
+from memory_profiler import profile
 
 class Cleaner:
     @staticmethod
+    @profile
     def clean(text):
         # Takes care of words like 'psych- ology' with weird spacing
         text = text.replace('-\n', '')
@@ -97,9 +98,14 @@ class Cleaner:
         
         # Drop any empty sentences
         sentences = list(filter(None, sentences))
+        
+        del text
+        del words
+        del sentence_index
 
         return sentences
-
+    
+    @profile
     def clean_file(self, input_file):
         with open(input_file) as file:
             text = file.read()

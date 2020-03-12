@@ -1,5 +1,6 @@
 import numpy as np
 import logging
+import gc
 
 from similarity import Similarity
 
@@ -31,5 +32,8 @@ class MatrixBuilder:
                 sim_matrix[j][i] = sim_matrix[i][j]
 
             sim_matrix[i][i] = 1.00
+        
+        del sim
+        gc.collect()
 
         return sim_matrix
