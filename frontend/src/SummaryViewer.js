@@ -4,7 +4,7 @@ import './SummaryViewer.css';
 import { brevityHttpGet, poll } from './Utilities';
 
 const POLLING_TIMEOUT = 10 * 60 * 1000;
-const POLLING_INTERVAL = 1000;
+const POLLING_INTERVAL = 5000;
 
 class SummaryViewer extends React.Component {
   constructor(props) {

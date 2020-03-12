@@ -29,11 +29,11 @@ class Cleaner:
                 previous_sentence = sentences[index - 1]
                 if index < len(sentences) - 1:
                     next_sentence = sentences[index + 1]
-                if not previous_sentence.isdigit() and not sentence.isdigit() \
-                        and not next_sentence.isdigit():
-                    sentences[index - 1] = '{}.{}.{}'.format(previous_sentence,
-                                                             sentence,
-                                                             next_sentence)
+                    if not previous_sentence.isdigit() and not sentence.isdigit() \
+                            and not next_sentence.isdigit():
+                        sentences[index - 1] = '{}.{}.{}'.format(previous_sentence,
+                                                                 sentence,
+                                                                 next_sentence)
                 sentences[index] = ''
                 if index < len(sentences) - 1:
                     sentences[index + 1] = ''
@@ -110,9 +110,12 @@ class Cleaner:
         # Drop any empty sentences
         sentences = list(filter(None, sentences))
         
-        del text
-        del words
-        del sentence_index
+        try:
+            del text
+            del words
+            del sentence_index
+        except:
+            pass
 
         return sentences
     
