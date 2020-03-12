@@ -1,13 +1,10 @@
 import networkx as nx
 import matplotlib
-import gc
-from memory_profiler import profile
 matplotlib.use("Agg")
 
 
 class Grapher:
     @staticmethod
-    @profile
     def graph(g_mat):
         graph = nx.Graph(g_mat)
         pagerank = nx.pagerank(graph)

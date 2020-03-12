@@ -10,13 +10,10 @@ import threading
 import logging
 import struct
 import gc
-import weakref
-from memory_profiler import profile
 
 class Extractor:
 
     @staticmethod
-    @profile
     def extract(raw_txt, logger):
 
         c = Cleaner()
@@ -80,7 +77,6 @@ class Extractor:
 class Processor:
 
     @staticmethod
-    @profile
     def processMessage(message, consumer, producer, logger):
         ext = Extractor()
 
@@ -93,7 +89,7 @@ class Processor:
             text += character
 
         summary = ext.extract(raw_txt=text, logger=logger)
-#        logger.info('Summary: \n{}'.format(summary))
+        logger.info('Summary: \n{}'.format(summary))
 
         producer.send('brevity_responses', str.encode(summary), struct.pack('>Q', key))
         producer.flush()
@@ -107,12 +103,10 @@ class Processor:
 producer = KafkaProducer(bootstrap_servers='localhost:9092')
 
 class ConsumerThread(threading.Thread):
-    @profile
     def __init__(self, logger):
         super(ConsumerThread, self).__init__()
         self.logger = logger
 
-    @profile
     def run(self):
         consumer = KafkaConsumer('brevity_requests', group_id='nlp-consumers',
                                  bootstrap_servers=['localhost:9092'])
