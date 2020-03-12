@@ -33,5 +33,6 @@ class MatrixBuilder:
             sim_matrix[i][i] = 1.00
         
         del sim
+        del score
 
         return sim_matrix
