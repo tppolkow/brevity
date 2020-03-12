@@ -59,19 +59,22 @@ class Extractor:
                 top_ranked_sentence = cleaned_text_list[key]
                 result += '{}. '.format(top_ranked_sentence)
             result += '\n\n'
-        
-        del c
-        del cleaned_text_list
-        del matrix_builder
-        del matrix
-        del g
-        del pageranks
-        del total_doc_size
-        del summary_length
-        del top_ranked
-        del cl
-        del raw_txt
-
+       
+        try:
+            del c
+            del cleaned_text_list
+            del matrix_builder
+            del matrix
+            del g
+            del pageranks
+            del total_doc_size
+            del summary_length
+            del top_ranked
+            del cl
+            del raw_txt
+        except:
+            pass
+    
         return result
 
 class Processor:
@@ -94,10 +97,13 @@ class Processor:
         producer.send('brevity_responses', str.encode(summary), struct.pack('>Q', key))
         producer.flush()
 
-        del key
-        del text_array
-        del text
-        del summary
+        try:
+            del key
+            del text_array
+            del text
+            del summary
+        except:
+            pass
 
 
 producer = KafkaProducer(bootstrap_servers='localhost:9092')
@@ -114,8 +120,11 @@ class ConsumerThread(threading.Thread):
         for message in consumer:
             proc = Processor()
             proc.processMessage(message=message, consumer=consumer, producer=producer, logger=self.logger)
-            del proc
-            gc.collect()
+            try:
+                del proc
+                gc.collect()
+            except:
+                pass
             
 for i in range(8):
     fname = '../log/nlp' + str(i) + '.log'

@@ -110,9 +110,12 @@ class Cleaner:
         # Drop any empty sentences
         sentences = list(filter(None, sentences))
         
-        del text
-        del words
-        del sentence_index
+        try:
+            del text
+            del words
+            del sentence_index
+        except:
+            pass
 
         return sentences
     
