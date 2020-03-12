@@ -50,7 +50,7 @@ class Extractor:
         top_ranked.sort()
 
         cl = Cluster()
-        top_ranked = cl.splitIntoParagraph(top_ranked, 10)
+        top_ranked = cl.splitIntoParagraph(top_ranked, 7.5)
 
         logger.debug(top_ranked)
         result = ''
