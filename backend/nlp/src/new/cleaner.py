@@ -16,27 +16,28 @@ class Cleaner:
 
         # Split text into sentences
         sentences = text.split('.')
-
+        
         # Remove any space at the beginning or end of sentence
         for sentence in sentences:
             index = sentences.index(sentence)
             new_sentence = sentence.strip()
             sentences[index] = new_sentence
-
+            
         # Join any 1 word sentence with previous sentence
         for sentence in sentences:
-            if len(sentence.split()) == 1:
+            if len(sentence.split()) < 3:
                 index = sentences.index(sentence)
                 previous_sentence = sentences[index - 1]
                 if index < len(sentences) - 1:
                     next_sentence = sentences[index + 1]
-                sentences[index - 1] = '{}.{}.{}'.format(previous_sentence,
-                                                         sentence,
-                                                         next_sentence)
+                if not previous_sentence.isdigit() and not sentence.isdigit() \
+                        and not next_sentence.isdigit():
+                    sentences[index - 1] = '{}.{}.{}'.format(previous_sentence,
+                                                             sentence,
+                                                             next_sentence)
                 sentences[index] = ''
                 if index < len(sentences) - 1:
                     sentences[index + 1] = ''
-
         # Replace any sentence that have less than 5 words with empty
         min_number_of_words = 5
         for sentence in sentences:
@@ -60,12 +61,17 @@ class Cleaner:
                 index = sentences.index(sentence)
                 sentences[index] = ''
 
-        # Remove any sentence with figure/table/Fig keywords
+        undesirable = ['figure', 'table', 'fig', 'chapter', 'publisher',
+                       'publishers', 'ch', '>', '<', '+', '_' 'eg',
+                       'references', 'key terms']
+        # Remove any sentence with figure/table/Fig/chapter/page type keywords
         for sent in sentences:
             index = sentences.index(sent)
             sent = sent.lower()
-            if 'figure' in sent or 'table' in sent or 'fig' in sent:
-                sentences[index] = ''
+            for u in undesirable:
+                if u in sent:
+                    sentences[index] = ''
+                    break
 
         # Replace all sentences that have random spacing with empty
         # Example: Psychology 43 c o n c e p t c h e c k 2.
@@ -86,6 +92,13 @@ class Cleaner:
                 index = sentences.index(sentence)
                 sentences[index] = ''
 
+        # Replace all sentences that have a time
+        for sentence in sentences:
+            is_match = re.match(r'([0-9]+)(:|-)[0-5][0-9]', sentence)
+            if is_match:
+                index = sentences.index(sentence)
+                sentences[index] = ''
+
         # Replace all sentences that have any words in all CAPS
         for sentence in sentences:
             sentence_index = sentences.index(sentence)
@@ -97,7 +110,6 @@ class Cleaner:
         
         # Drop any empty sentences
         sentences = list(filter(None, sentences))
-
         return sentences
 
     def clean_file(self, input_file):
