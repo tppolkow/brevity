@@ -1,6 +1,5 @@
 import re
 
-
 class Cleaner:
     @staticmethod
     def clean(text):
@@ -110,8 +109,13 @@ class Cleaner:
         
         # Drop any empty sentences
         sentences = list(filter(None, sentences))
-        return sentences
+        
+        del text
+        del words
+        del sentence_index
 
+        return sentences
+    
     def clean_file(self, input_file):
         with open(input_file) as file:
             text = file.read()

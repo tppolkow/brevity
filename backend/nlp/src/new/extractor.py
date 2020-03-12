@@ -9,7 +9,7 @@ from kafka import KafkaProducer
 import threading
 import logging
 import struct
-
+import gc
 
 class Extractor:
 
@@ -59,12 +59,48 @@ class Extractor:
                 top_ranked_sentence = cleaned_text_list[key]
                 result += '{}. '.format(top_ranked_sentence)
             result += '\n\n'
+        
+        del c
+        del cleaned_text_list
+        del matrix_builder
+        del matrix
+        del g
+        del pageranks
+        del total_doc_size
+        del summary_length
+        del top_ranked
+        del cl
+        del raw_txt
 
         return result
 
+class Processor:
+
+    @staticmethod
+    def processMessage(message, consumer, producer, logger):
+        ext = Extractor()
+
+        # unpack the summary id, set > for big endian, Q for unsigned long
+        (key,) = struct.unpack('>Q', message.key)
+
+        text_array = message.value.decode('utf-8')
+        text = ''
+        for character in text_array:
+            text += character
+
+        summary = ext.extract(raw_txt=text, logger=logger)
+        logger.info('Summary: \n{}'.format(summary))
+
+        producer.send('brevity_responses', str.encode(summary), struct.pack('>Q', key))
+        producer.flush()
+
+        del key
+        del text_array
+        del text
+        del summary
+
 
 producer = KafkaProducer(bootstrap_servers='localhost:9092')
-
 
 class ConsumerThread(threading.Thread):
     def __init__(self, logger):
@@ -74,26 +110,13 @@ class ConsumerThread(threading.Thread):
     def run(self):
         consumer = KafkaConsumer('brevity_requests', group_id='nlp-consumers',
                                  bootstrap_servers=['localhost:9092'])
-
-        ext = Extractor()
-
+        
         for message in consumer:
-            # unpack the summary id, set > for big endian, Q for unsigned long
-            (key,) = struct.unpack('>Q', message.key)
-
-            text_array = message.value.decode('utf-8')
-            text = ''
-            for character in text_array:
-                text += character
-
-            summary = ext.extract(raw_txt=text, logger=self.logger)
-
-            self.logger.info('Summary: \n{}'.format(summary))
-
-            producer.send('brevity_responses', str.encode(summary),
-                          struct.pack('>Q', key))
-
-
+            proc = Processor()
+            proc.processMessage(message=message, consumer=consumer, producer=producer, logger=self.logger)
+            del proc
+            gc.collect()
+            
 for i in range(8):
     fname = '../log/nlp' + str(i) + '.log'
     handler = logging.FileHandler(fname)
